@@ -1,0 +1,168 @@
+import React, { useState, useEffect, useContext } from "react";
+import { PlusCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import { GlobleContext } from "../../context/GlobleContext";
+
+export default function HRProjectMang() {
+  const [activeTab, setActiveTab] = useState("all");
+  const [expandedId, setExpandedId] = useState(null);
+
+  const { projects, setProjects } = useContext(GlobleContext);
+
+  const filteredProjects =
+    activeTab === "all"
+      ? projects
+      : projects.filter(
+          (p) => p?.status?.toLowerCase() === activeTab.toLowerCase()
+        );
+
+  const toggleExpand = (id) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
+
+  const getProject = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/admin/getProject",
+        { withCredentials: true }
+      );
+      setProjects(response.data.projects || []);
+    } catch (error) {
+      console.log("Unable to fetch projects", error);
+    }
+  };
+
+  useEffect(() => {
+    getProject();
+  }, []);
+
+  return (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold">Project Management</h1>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-4 mb-6">
+        {['all', 'ongoing', 'completed', 'pending'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 rounded-full capitalize shadow cursor-pointer ${
+              activeTab === tab
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-700"
+            }`}
+          >
+            {tab} Projects
+          </button>
+        ))}
+      </div>
+
+      {/* Project List */}
+      <div className="space-y-4">
+        {filteredProjects.length > 0 ? (
+          filteredProjects.map((proj) => {
+            const isOpen = expandedId === proj.id;
+
+            return (
+              <div
+                key={proj.id}
+                className="border rounded-xl p-4 bg-white shadow transition-all"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-semibold">{proj?.name}</h3>
+                    <p className="text-gray-600">Client: {proj?.client}</p>
+
+                    <span className="mt-2 inline-block px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-600">
+                      {proj?.status}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => toggleExpand(proj.id)}
+                      className="flex items-center gap-1 text-blue-600 hover:underline cursor-pointer"
+                    >
+                      {isOpen ? (
+                        <>
+                          View Less <ChevronUp size={18} />
+                        </>
+                      ) : (
+                        <>
+                          View More <ChevronDown size={18} />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.div
+                      key="expand"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="overflow-hidden mt-4 border-t pt-4"
+                    >
+                      <div className="mb-4">
+                        <p className="font-medium">
+                          Manager: {proj?.manager?.firstName} {proj?.manager?.lastName}
+                        </p>
+                        <p className="text-gray-600 text-sm">{proj?.manager?.email}</p>
+                      </div>
+
+                      <p className="mt-1">
+                        <span className="font-medium">Deadline:</span> {proj?.deadline}
+                      </p>
+
+                      <p className="mt-1">
+                        <span className="font-medium">Created At:</span>{" "}
+                        {new Date(proj?.createdAt).toLocaleDateString()}
+                      </p>
+
+                      <p className="mt-1">
+                        <span className="font-medium">Updated At:</span>{" "}
+                        {new Date(proj?.updatedAt).toLocaleDateString()}
+                      </p>
+
+                      <div className="mt-4">
+                        <span className="font-medium">Team Members:</span>
+
+                        <ul className="mt-2 grid grid-cols-2 gap-3 text-gray-700">
+                          {proj?.members?.length > 0 ? (
+                            proj.members.map((emp) => (
+                              <li
+                                key={emp.id}
+                                className="flex items-center gap-3 p-3 rounded-xl border bg-gray-50 hover:shadow transition cursor-pointer"
+                              >
+                                <div className="flex flex-col leading-tight">
+                                  <span className="font-medium">
+                                    {emp.firstName} {emp.lastName}
+                                  </span>
+                                  <span className="text-xs text-gray-500">{emp.email}</span>
+                                </div>
+                              </li>
+                            ))
+                          ) : (
+                            <li className="text-gray-500 mt-2 list-none">No members assigned</li>
+                          )}
+                        </ul>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })
+        ) : (
+          <p className="text-gray-500 mt-4">No projects in this category.</p>
+        )}
+      </div>
+    </div>
+  );
+}
