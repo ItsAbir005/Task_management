@@ -38,7 +38,7 @@ export const getManagerProjects = asyncHandler(async (req, res, next) => {
 
 export const updateProjectStatus = asyncHandler(async (req, res, next) => {
     const { tenantId, employeeId } = req;
-    const { projectId } = req.params;
+    const projectId = req.params.projectId as string;
     const { status } = req.body;
 
     if (!tenantId || !employeeId || !projectId || !status) {
@@ -253,7 +253,9 @@ export const updateManagerLeaveStatus = asyncHandler(async (req, res, next) => {
         }
     });
 
-    req.io.to(updatedLeave.employeeId).emit("leave-updated", { leave: updatedLeave, notification });
+    if (req.io) {
+        req.io.to(updatedLeave.employeeId).emit("leave-updated", { leave: updatedLeave, notification });
+    }
 
     res.status(200).json({ success: true, message: `Leave ${managerStatus} by Manager`, leave: updatedLeave });
 });
@@ -343,7 +345,7 @@ export const createTask = asyncHandler(async (req, res, next) => {
 
 export const updateTaskStatus = asyncHandler(async (req, res, next) => {
     const { tenantId, employeeId } = req;
-    const { taskId } = req.params;
+    const taskId = req.params.taskId as string;
     const { status, priority, title, description } = req.body;
 
     // Verify task ownership or authorization (Only creator can update details, but ANYONE (assignee/creator) can update status?)
@@ -383,7 +385,7 @@ export const updateTaskStatus = asyncHandler(async (req, res, next) => {
 
 export const deleteTask = asyncHandler(async (req, res, next) => {
     const { tenantId, employeeId } = req;
-    const { taskId } = req.params;
+    const taskId = req.params.taskId as string;
 
     const existingTask = await prisma.task.findFirst({
         where: { id: taskId, tenantId, creatorId: employeeId }

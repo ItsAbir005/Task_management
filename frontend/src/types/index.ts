@@ -3,12 +3,21 @@ export type Role = 'ADMIN' | 'HR' | 'MANAGER' | 'EMPLOYEE';
 export interface User {
   id: string;
   email: string;
-  firstName: string;
+  name?: string;           // for Tenant/Admin
+  firstName?: string;      // for Employee roles
   lastName?: string;
   role: Role;
-  tenantId: string;
+  tenantId?: string;
   position?: string;
   departmentId?: string;
+  department?: { name: string };
+  phone?: string;
+  dateOfBirth?: string;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  salary?: number;
+  dateOfJoining?: string;
+  employmentType?: string;
+  status?: string;
 }
 
 export interface Employee extends User {

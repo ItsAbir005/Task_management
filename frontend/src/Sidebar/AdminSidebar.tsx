@@ -40,12 +40,16 @@ const NavItem = ({ collapsed, item }: { collapsed: boolean; item: { title: strin
   );
 };
 
-const AdminSidebar = ({ logout }: { logout: () => void }) => {
+const AdminSidebar = ({ logout, user }: { logout: () => void; user?: any }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const name = "John Doe";
+  // Admin is a Tenant (has .name), employee roles have .firstName
+  const displayName = user?.firstName
+    ? `${user.firstName} ${user.lastName || ''}`.trim()
+    : (user?.name || 'Admin');
+  const initials = displayName.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase() || 'A';
 
   const SidebarContent = (
     <div className="flex flex-col h-full bg-white border-r shadow-sm">
@@ -76,10 +80,10 @@ const AdminSidebar = ({ logout }: { logout: () => void }) => {
           onClick={() => setProfileOpen(!profileOpen)}
           className="flex items-center space-x-3 w-full hover:bg-gray-100 p-2 rounded"
         >
-          <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
-            <User size={16} color="white" />
+          <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            {initials}
           </div>
-          {!collapsed && <span className="text-sm font-medium">{name}</span>}
+          {!collapsed && <span className="text-sm font-medium truncate max-w-[120px]">{displayName}</span>}
         </button>
 
         {profileOpen && !collapsed && (

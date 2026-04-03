@@ -64,16 +64,6 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 /* ======================
-   ROUTES
-====================== */
-app.use('/api/auth', router);
-app.use('/api/admin', router1);
-app.use('/api/stripe', stripeRouter);
-
-// Standard Error Handler (Always last)
-app.use(errorMiddleware);
-
-/* ======================
    SOCKET.IO SETUP
 ====================== */
 const server = http.createServer(app);
@@ -85,14 +75,24 @@ const io = new Server(server, {
   },
 });
 
-// Socket auth
-io.use(SocketAuth);
-
-// Attach io to requests
+// Attach io to ALL requests — must be before route registrations
 app.use((req: Request, res: Response, next: NextFunction) => {
   (req as any).io = io;
   next();
 });
+
+// Socket auth
+io.use(SocketAuth);
+
+/* ======================
+   ROUTES
+====================== */
+app.use('/api/auth', router);
+app.use('/api/admin', router1);
+app.use('/api/stripe', stripeRouter);
+
+// Standard Error Handler (Always last)
+app.use(errorMiddleware);
 
 /* ======================
    SOCKET EVENTS

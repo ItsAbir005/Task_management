@@ -13,7 +13,7 @@ const SetPassword = () => {
   const [success, setSuccess] = useState(false);
 
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -27,7 +27,7 @@ const SetPassword = () => {
       return;
     }
 
-    console.log(token, password)
+
 
     try {
       const res = await axios.post("http://localhost:3000/api/auth/setPassword", {
@@ -41,7 +41,7 @@ const SetPassword = () => {
           navigate("/login");
         }, 2000); // Redirect to login after 2 seconds
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err?.response?.data?.message || "Something went wrong Setting Password");
     }
   };
@@ -76,7 +76,7 @@ const SetPassword = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full border rounded-lg p-2 outline-none focus:ring focus:ring-blue-200"
                 required
-                minLength="6"
+                minLength={6}
               />
             </div>
 
@@ -89,7 +89,7 @@ const SetPassword = () => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full border rounded-lg p-2 outline-none focus:ring focus:ring-blue-200"
                 required
-                minLength="6"
+                minLength={6}
               />
             </div>
 

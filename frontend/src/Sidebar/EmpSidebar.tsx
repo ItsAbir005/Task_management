@@ -22,7 +22,7 @@ const menuItems = [
   { title: "Profile Setting", to: "/employee/profile", icon: <Settings size={20} /> },
 ];
 
-const NavItem = ({ collapsed, item }) => {
+const NavItem = ({ collapsed, item }: { collapsed: boolean; item: { title: string; to: string; icon: React.ReactNode } }) => {
   return (
     <NavLink
       to={item.to}
@@ -38,12 +38,15 @@ const NavItem = ({ collapsed, item }) => {
   );
 };
 
-const EmpSidebar = ({ logout }) => {
+const EmpSidebar = ({ logout, user }: { logout: any; user?: any }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const name = "John Doe";
+  const displayName = user?.firstName
+    ? `${user.firstName} ${user.lastName || ''}`.trim()
+    : (user?.name || 'Employee');
+  const initials = displayName.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase() || 'E';
 
   const SidebarContent = (
     <div className="flex flex-col h-full bg-white border-r shadow-sm">
@@ -74,16 +77,16 @@ const EmpSidebar = ({ logout }) => {
           onClick={() => setProfileOpen(!profileOpen)}
           className="flex items-center space-x-3 w-full hover:bg-gray-100 p-2 rounded"
         >
-          <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
-            <User size={16} color="white" />
+          <div className="w-8 h-8 bg-violet-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            {initials}
           </div>
-          {!collapsed && <span className="text-sm font-medium">{name}</span>}
+          {!collapsed && <span className="text-sm font-medium truncate max-w-[120px]">{displayName}</span>}
         </button>
 
         {profileOpen && !collapsed && (
           <div className="mt-2 bg-white border rounded shadow-md">
             <NavLink
-              to="/hr/profile"
+              to="/employee/profile"
               onClick={() => setProfileOpen(false)}
               className="block px-4 py-2 text-sm hover:bg-gray-100"
             >

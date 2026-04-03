@@ -19,10 +19,10 @@ const MainSidebar = () => {
 
   return (
     <>
-      {user.role === "ADMIN" && <AdminSidebar logout={logout} />}
-      {user.role === "EMPLOYEE" && <EmpSidebar logout={logout} />}
-      {user.role === "HR" && <HRSidebar logout={logout} />}
-      {user.role === "MANAGER" && <MangSidebar logout={logout} />}
+      {user.role === "ADMIN" && <AdminSidebar logout={logout} user={user} />}
+      {user.role === "EMPLOYEE" && <EmpSidebar logout={logout} user={user} />}
+      {user.role === "HR" && <HRSidebar logout={logout} user={user} />}
+      {user.role === "MANAGER" && <MangSidebar logout={logout} user={user} />}
     </>
   )
 }

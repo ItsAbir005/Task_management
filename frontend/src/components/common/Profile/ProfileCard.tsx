@@ -1,8 +1,44 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Mail, Briefcase, Activity, Building2 } from "lucide-react";
+import { Mail, Briefcase, Activity, Building2, LucideIcon } from "lucide-react";
 
-const InfoRow = ({ icon: Icon, label, value, themeColor = "violet" }) => {
+interface InfoRowProps {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  themeColor?: string;
+}
+
+interface StatItem {
+  label: string;
+  value: string | number;
+  icon?: LucideIcon;
+}
+
+interface PersonalInfo {
+  firstName: string;
+  lastName: string;
+  email?: string;
+  position?: string;
+}
+
+interface EmploymentInfo {
+  department: string;
+  dateOfJoining: string;
+  salary: string;
+  employmentType: string;
+  status: string;
+}
+
+interface ProfileCardProps {
+  user?: any;
+  personalInfo: PersonalInfo;
+  employmentInfo: EmploymentInfo;
+  themeColor?: string;
+  stats?: StatItem[];
+}
+
+const InfoRow = ({ icon: Icon, label, value, themeColor = "violet" }: InfoRowProps) => {
   const iconClasses = {
     violet: "group-hover/row:bg-violet-50 group-hover/row:text-violet-600",
     emerald: "group-hover/row:bg-emerald-50 group-hover/row:text-emerald-600",
@@ -25,8 +61,11 @@ const InfoRow = ({ icon: Icon, label, value, themeColor = "violet" }) => {
   );
 };
 
-const ProfileCard = ({ user, personalInfo, employmentInfo, themeColor = "violet", stats = [] }) => {
-  const initials = `${personalInfo.firstName.charAt(0)}${personalInfo.lastName.charAt(0)}`.toUpperCase() || "U";
+const ProfileCard = ({ user, personalInfo, employmentInfo, themeColor = "violet", stats = [] }: ProfileCardProps) => {
+  // Resolve display name: prefer personalInfo state, fallback to user context, then admin `name`
+  const displayFirst = personalInfo.firstName || user?.firstName || (user?.name ? user.name.split(' ')[0] : '') || '';
+  const displayLast  = personalInfo.lastName  || user?.lastName  || (user?.name ? user.name.split(' ').slice(1).join(' ') : '') || '';
+  const initials = ((displayFirst?.[0] || '') + (displayLast?.[0] || '')).toUpperCase() || 'U';
 
   const gradientClasses = {
     violet: "from-violet-400 via-fuchsia-500 to-violet-700 shadow-violet-500/30",
@@ -63,7 +102,7 @@ const ProfileCard = ({ user, personalInfo, employmentInfo, themeColor = "violet"
         </div>
 
         <h2 className="text-2xl font-black text-slate-800 tracking-tight">
-          {personalInfo.firstName || user?.firstName} {personalInfo.lastName || user?.lastName}
+          {displayFirst} {displayLast}
         </h2>
         
         <div className="flex items-center justify-center gap-2 mt-2 flex-wrap">
@@ -113,7 +152,7 @@ const ProfileCard = ({ user, personalInfo, employmentInfo, themeColor = "violet"
             <div className="grid grid-cols-2 gap-3">
               {stats.map(({ label, value, icon: Icon }) => (
                 <div key={label} className="p-3 bg-white/10 rounded-2xl backdrop-blur-sm">
-                  {Icon && <Icon className="w-4 h-4 text-white/70 mb-1.5" />}
+                  {Icon && React.createElement(Icon as React.ElementType, { className: "w-4 h-4 text-white/70 mb-1.5" })}
                   <p className="text-xl font-black text-white leading-none">{value}</p>
                   <p className="text-[9px] font-bold text-white/70 uppercase tracking-wider mt-1">{label}</p>
                 </div>

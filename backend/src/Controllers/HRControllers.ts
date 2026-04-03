@@ -6,15 +6,9 @@ import prisma from "../utils/client.js";
 export const getHRLeaves = asyncHandler(async (req, res) => {
     const { tenantId } = req;
 
-    // HR sees leaves where: (manager approved) OR (no manager assigned = direct to HR)
+    // HR sees ALL leave requests — they have full visibility regardless of manager status
     const leave = await prisma.leave.findMany({
-        where: {
-            tenantId,
-            OR: [
-                { managerStatus: 'APPROVED' },
-                { managerId: null }
-            ]
-        },
+        where: { tenantId },
         orderBy: { appliedAt: 'desc' },
         include: {
             employee: {
@@ -60,11 +54,16 @@ export const updateLeaveStatus = asyncHandler(async (req, res) => {
   // HR decision is FINAL — it sets global status
   const globalStatus = hrStatus === 'APPROVED' ? 'APPROVED' : 'REJECTED';
 
+  // Verify the leave belongs to this tenant before updating
+  const existingLeave = await prisma.leave.findFirst({
+    where: { id: leaveId, tenantId },
+  });
+  if (!existingLeave) {
+    return res.status(404).json({ message: 'Leave not found' });
+  }
+
   const leave = await prisma.leave.update({
-    where: {
-      id: leaveId,
-      tenantId,
-    },
+    where: { id: leaveId },   // id is the unique field
     data: {
       hrStatus,
       hrId: employeeId,
@@ -86,11 +85,10 @@ export const updateLeaveStatus = asyncHandler(async (req, res) => {
     },
   });
 
-  // ⚡ Emit real-time event
-  req.io.to(leave.employeeId).emit("leave-updated", {
-    leave,
-    notification,
-  });
+  // ⚡ Emit real-time event (guard in case socket not connected)
+  if (req.io) {
+    req.io.to(leave.employeeId).emit("leave-updated", { leave, notification });
+  }
 
   res.json({ success: true, message: `Leave ${globalStatus} by HR`, leave });
 });

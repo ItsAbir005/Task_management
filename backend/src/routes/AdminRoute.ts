@@ -36,7 +36,7 @@ router.post('/manager-task', AuthenticateMiddleware, authorize('MANAGER', 'ADMIN
 router.put('/manager-task/:taskId', AuthenticateMiddleware, authorize('MANAGER', 'ADMIN'), updateTaskStatus);
 router.delete('/manager-task/:taskId', AuthenticateMiddleware, authorize('MANAGER', 'ADMIN'), deleteTask);
 
-router.get('/emp-tasks', AuthenticateMiddleware, authorize('EMPLOYEE', 'ADMIN'), getEmpTasks);
-router.patch('/emp-task-status/:taskId', AuthenticateMiddleware, authorize('EMPLOYEE', 'ADMIN'), updateEmpTaskStatus);
+router.get('/emp-tasks', AuthenticateMiddleware, authorize('EMPLOYEE', 'ADMIN', 'MANAGER'), getEmpTasks);
+router.patch('/emp-task-status/:taskId', AuthenticateMiddleware, authorize('EMPLOYEE', 'ADMIN', 'MANAGER'), updateEmpTaskStatus);
 
 export default router;

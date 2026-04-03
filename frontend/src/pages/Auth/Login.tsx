@@ -34,8 +34,10 @@ const Login = () => {
 
       const res = await axios.post(endpoint, { email: form.email, password: form.password }, { withCredentials: true });
 
-      setUser(res.data);
+      // Extract the actual user object from the response (not the whole response)
       const role = res.data.role || res.data.employee?.role || res.data.tenant?.role;
+      const userObj = res.data.employee || res.data.tenant || res.data.user || res.data;
+      setUser(userObj);
 
       if (role === "ADMIN") navigate("/admin/dashboard");
       else if (role === "HR") navigate("/hr/dashboard");
