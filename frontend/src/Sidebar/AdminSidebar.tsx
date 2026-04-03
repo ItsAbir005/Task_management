@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Menu,
   X,
+  UserPlus,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -19,10 +20,11 @@ const menuItems = [
   { title: "Employee Management", to: "/admin/employee", icon: <Users size={20} /> },
   { title: "Department Management", to: "/admin/department", icon: <CheckSquare size={20} /> },
   { title: "Project Management", to: "/admin/project", icon: <Calendar size={20} /> },
+  { title: "Invite HR & Manager", to: "/admin/invite", icon: <UserPlus size={20} /> },
   { title: "Profile Management", to: "/admin/profile", icon: <Settings size={20} /> },
 ];
 
-const NavItem = ({ collapsed, item }) => {
+const NavItem = ({ collapsed, item }: { collapsed: boolean; item: { title: string; to: string; icon: React.ReactNode } }) => {
   return (
     <NavLink
       to={item.to}
@@ -38,7 +40,7 @@ const NavItem = ({ collapsed, item }) => {
   );
 };
 
-const AdminSidebar = ({ logout }) => {
+const AdminSidebar = ({ logout }: { logout: () => void }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);

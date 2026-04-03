@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   Palmtree,
+  UserPlus,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -20,10 +21,11 @@ const menuItems = [
   { title: "Project Management", to: "/manager/projectmanagement", icon: <Calendar size={20} /> },
   { title: "Task Management", to: "/manager/taskmanagement", icon: <CheckSquare size={20} /> },
   { title: "Leave Management", to: "/manager/leavemanagement", icon: <Palmtree size={20} /> },
+  { title: "Invite Employee", to: "/manager/invite", icon: <UserPlus size={20} /> },
   { title: "Profile Management", to: "/manager/profilemanagement", icon: <Settings size={20} /> },
 ];
 
-const NavItem = ({ collapsed, item }) => {
+const NavItem = ({ collapsed, item }: { collapsed: boolean; item: { title: string; to: string; icon: React.ReactNode } }) => {
   return (
     <NavLink
       to={item.to}
@@ -39,7 +41,7 @@ const NavItem = ({ collapsed, item }) => {
   );
 };
 
-const MangSidebar = ({ logout }) => {
+const MangSidebar = ({ logout }: { logout: () => void }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);

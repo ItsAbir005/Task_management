@@ -8,7 +8,6 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 
@@ -17,21 +16,47 @@ datasource db {
 //  TENANT
 // ========================
 model Tenant {
-  id          String     @id @default(cuid())
-  name        String
-  email       String     @unique
-  password    String
-  role        Role      @default(ADMIN)
+  id                   String             @id @default(cuid())
+  name                 String
+  email                String             @unique
+  password             String
+  role                 Role               @default(ADMIN)
 
-  domain      String?    @unique
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  domain               String?            @unique
 
-  employees   Employee[]
-  departments Department[]
-  projects    Project[]
-  leaves      Leave[]
-  tasks       Task[]
+  // Stripe
+  subscriptionStatus   SubscriptionStatus @default(INACTIVE)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  employees            Employee[]
+  departments          Department[]
+  projects             Project[]
+  leaves               Leave[]
+  tasks                Task[]
+  inviteTokens         InviteToken[]
+}
+
+
+// ========================
+//  INVITE TOKEN
+// ========================
+model InviteToken {
+  id        String   @id @default(cuid())
+  tenantId  String
+  email     String
+  role      Role
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  sentById  String?  // employeeId of manager who sent invite (null if admin sent)
+
+  createdAt DateTime @default(now())
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
 }
 
 
@@ -289,5 +314,11 @@ enum NotificationType {
   LEAVE
   SALARY
   SYSTEM
+}
+
+enum SubscriptionStatus {
+  INACTIVE
+  ACTIVE
+  CANCELLED
 }
 

@@ -1,16 +1,17 @@
 import { Routes, Route } from "react-router-dom";
-import React, { useContext } from "react";
+import React from "react";
 import Login from "./pages/Auth/Login";
 import Home from "./pages/Home";
 import SignUp from "./pages/Auth/SignUp";
+import SignUpSuccess from "./pages/Auth/SignUpSuccess";
 import SetPassword from "./pages/Auth/SetPassword";
 import MainLayout from "./layouts/MainLayout";
-import { GlobleContext } from "./context/GlobleContext";
 import AdminDashboardPage from "./pages/Admin/AdminDashboardPage";
 import DapManagement from "./pages/Admin/DepManagement";
 import ProManagement from "./pages/Admin/ProManagement";
 import ProfieManagement from "./pages/Admin/ProfieManagement";
 import EmpManagement from "./pages/Admin/EmpManagement";
+import InvitePage from "./pages/Admin/InvitePage";
 import HrDashboard from "./pages/HR/HrDashboard";
 import HrDepManagement from "./pages/HR/HrDepManagement";
 import HrProManagement from "./pages/HR/HrProManagement";
@@ -22,6 +23,7 @@ import MangLeaveManagement from "./pages/Manager/MangLeaveManagement";
 import ManProfileManagement from "./pages/Manager/ManProfileManagement";
 import MangProManagement from "./pages/Manager/MangProManagement";
 import TaskManagementPage from "./pages/Manager/TaskManagementPage";
+import ManagerInvitePage from "./pages/Manager/ManagerInvitePage";
 import EmpDashboard from "./pages/Employee/EmpDashboard";
 import EmpTaskManagement from "./pages/Employee/EmpTaskManagement";
 import EmpProfileManagement from "./pages/Employee/EmpProfileManagement";
@@ -30,12 +32,13 @@ import ProtectedRoute from "./layouts/ProtectedRoute";
 import EmpProject from "./pages/Employee/EmpProject";
 
 const App = () => {
-
   return (
     <Routes>
+      {/* Public */}
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
+      <Route path="/signup/success" element={<SignUpSuccess />} />
       <Route path="/set-password" element={<SetPassword />} />
 
       {/* ADMIN */}
@@ -46,6 +49,7 @@ const App = () => {
           <Route path="project" element={<ProManagement />} />
           <Route path="profile" element={<ProfieManagement />} />
           <Route path="employee" element={<EmpManagement />} />
+          <Route path="invite" element={<InvitePage />} />
         </Route>
       </Route>
 
@@ -69,6 +73,7 @@ const App = () => {
           <Route path="profilemanagement" element={<ManProfileManagement />} />
           <Route path="leavemanagement" element={<MangLeaveManagement />} />
           <Route path="taskmanagement" element={<TaskManagementPage />} />
+          <Route path="invite" element={<ManagerInvitePage />} />
         </Route>
       </Route>
 
