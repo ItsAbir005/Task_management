@@ -365,7 +365,7 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
   if (tenantId && !employeeId) {
     user = await prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { id: true, name: true, email: true, role: true, domain: true, subscriptionStatus: true },
+      select: { id: true, name: true, email: true, role: true, domain: true, subscriptionStatus: true, profilePic: true },
     });
   }
 
@@ -373,7 +373,7 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
     user = await prisma.employee.findUnique({
       where: { id: employeeId },
       select: {
-        id: true, firstName: true, lastName: true, email: true, role: true, tenantId: true,
+        id: true, firstName: true, lastName: true, email: true, role: true, tenantId: true, profilePic: true,
         phone: true, dateOfBirth: true, gender: true, position: true, salary: true,
         dateOfJoining: true, employmentType: true, status: true, departmentId: true,
         department: { select: { id: true, name: true } },
@@ -399,14 +399,14 @@ export const updateMe = asyncHandler(async (req: Request, res: Response) => {
     updatedUser = await prisma.tenant.update({
       where: { id: tenantId },
       data: { name, email },
-      select: { id: true, name: true, email: true, role: true, domain: true },
+      select: { id: true, name: true, email: true, role: true, domain: true, profilePic: true },
     });
   } else if (employeeId) {
     updatedUser = await prisma.employee.update({
       where: { id: employeeId },
       data: { firstName, lastName, email, phone, gender, dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined, position },
       select: {
-        id: true, firstName: true, lastName: true, email: true, role: true, tenantId: true,
+        id: true, firstName: true, lastName: true, email: true, role: true, tenantId: true, profilePic: true,
         phone: true, dateOfBirth: true, gender: true, position: true, salary: true,
         dateOfJoining: true, employmentType: true, status: true, departmentId: true,
         department: { select: { id: true, name: true } },
@@ -486,4 +486,38 @@ export const registerEmployeesBulk = asyncHandler(async (req: Request, res: Resp
   const result = await prisma.employee.createMany({ data: newEmployeeData, skipDuplicates: true });
 
   return res.status(201).json({ success: true, message: "Employees added successfully", insertedCount: result.count });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  UPLOAD PROFILE PICTURE
+// ─────────────────────────────────────────────────────────────────────────────
+export const uploadProfilePic = asyncHandler(async (req: Request, res: Response) => {
+  const { tenantId, employeeId } = req as any;
+  if (!req.file) {
+    return res.status(400).json({ message: "No image file provided" });
+  }
+
+  const fileUrl = req.file.path;
+  let updatedUser = null;
+
+  if (tenantId && !employeeId) {
+    updatedUser = await prisma.tenant.update({
+      where: { id: tenantId },
+      data: { profilePic: fileUrl },
+      select: { id: true, name: true, email: true, role: true, domain: true, profilePic: true },
+    });
+  } else if (employeeId) {
+    updatedUser = await prisma.employee.update({
+      where: { id: employeeId },
+      data: { profilePic: fileUrl },
+      select: {
+        id: true, firstName: true, lastName: true, email: true, role: true, tenantId: true, profilePic: true,
+        phone: true, dateOfBirth: true, gender: true, position: true, salary: true,
+        dateOfJoining: true, employmentType: true, status: true, departmentId: true,
+        department: { select: { id: true, name: true } },
+      },
+    });
+  }
+
+  res.json({ success: true, message: "Profile picture updated successfully", user: updatedUser });
 });

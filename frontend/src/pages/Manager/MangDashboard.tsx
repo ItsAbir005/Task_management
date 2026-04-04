@@ -7,7 +7,7 @@ import MangRecentLeaves from "../../components/Manager/Dashboard/MangRecentLeave
 import MangProjectChart from "../../components/Manager/Dashboard/MangProjectChart";
 
 const MangDashboard = () => {
-  const { managerStats, setManagerStats } = useContext(GlobleContext);
+  const { managerStats, setManagerStats } = useContext(GlobleContext) as any;
   const [loading, setLoading] = useState(!managerStats);
 
   useEffect(() => {

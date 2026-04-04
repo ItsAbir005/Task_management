@@ -6,10 +6,10 @@ import { Search, Loader2, Calendar, LayoutGrid, Users, CheckCircle, Clock } from
 import StatusBadge from "../../components/common/StatusBadge";
 
 const MangProManagement = () => {
-  const { managerProjects, setManagerProjects } = useContext(GlobleContext);
+  const { managerProjects, setManagerProjects } = useContext(GlobleContext) as any;
   const [loading, setLoading] = useState(managerProjects.length === 0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [updatingId, setUpdatingId] = useState(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -29,7 +29,7 @@ const MangProManagement = () => {
     fetchProjects();
   }, [setManagerProjects]);
 
-  const handleStatusUpdate = async (projectId, newStatus) => {
+  const handleStatusUpdate = async (projectId: string, newStatus: string) => {
     setUpdatingId(projectId);
     try {
       const res = await axios.put(
@@ -39,8 +39,8 @@ const MangProManagement = () => {
       );
       if (res.data.success) {
         // Optimistically update the exact project in state
-        setManagerProjects((prev) =>
-          prev.map((proj) =>
+        setManagerProjects((prev: any[]) =>
+          prev.map((proj: any) =>
             proj.id === projectId ? { ...proj, status: newStatus } : proj
           )
         );
@@ -52,15 +52,15 @@ const MangProManagement = () => {
     }
   };
 
-  const filteredProjects = managerProjects.filter((p) =>
+  const filteredProjects = managerProjects.filter((p: any) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     p.client.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Stats calculation
   const totalProjects = managerProjects.length;
-  const completedProjects = managerProjects.filter((p) => p.status === "COMPLETED").length;
-  const ongoingProjects = managerProjects.filter((p) => p.status === "ONGOING").length;
+  const completedProjects = managerProjects.filter((p: any) => p.status === "COMPLETED").length;
+  const ongoingProjects = managerProjects.filter((p: any) => p.status === "ONGOING").length;
 
   return (
     <div className="p-4 md:p-8 space-y-8 bg-slate-50 min-h-screen">
@@ -118,7 +118,7 @@ const MangProManagement = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           <AnimatePresence>
-            {filteredProjects.map((project, index) => (
+            {filteredProjects.map((project: any, index: number) => (
               <motion.div
                 key={project.id}
                 layout
@@ -161,7 +161,7 @@ const MangProManagement = () => {
 
                     <div className="flex items-center gap-1.5">
                       <div className="flex -space-x-2">
-                        {project.members && project.members.slice(0, 3).map((member, i) => (
+                        {project.members && project.members.slice(0, 3).map((member: any, i: number) => (
                           <div 
                             key={member.id} 
                             title={`${member.firstName} ${member.lastName}`}

@@ -20,15 +20,16 @@ import {
 import { GlobleContext } from "../../../context/GlobleContext";
 
 // Shared Components
-import ProfileLayout from "../../Common/Profile/ProfileLayout";
-import ProfileHeader from "../../Common/Profile/ProfileHeader";
-import ProfileField from "../../Common/Profile/ProfileField";
-import ProfileCard from "../../Common/Profile/ProfileCard";
-import SecuritySection from "../../Common/Profile/SecuritySection";
+import ProfileLayout from "../../common/Profile/ProfileLayout";
+import ProfileHeader from "../../common/Profile/ProfileHeader";
+import ProfileField from "../../common/Profile/ProfileField";
+import ProfileCard from "../../common/Profile/ProfileCard";
+import SecuritySection from "../../common/Profile/SecuritySection";
 
 const HrProfileManagement = () => {
-  const { user, setUser, hrStats } = useContext(GlobleContext);
+  const { user, setUser, hrStats } = useContext(GlobleContext) as any;
   const [loading, setLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
   const [personalInfo, setPersonalInfo] = useState({
@@ -71,12 +72,12 @@ const HrProfileManagement = () => {
     }
   }, [user]);
 
-  const showMsg = (type, text) => {
+  const showMsg = (type: string, text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage({ type: "", text: "" }), 5000);
   };
 
-  const handlePersonalUpdate = async (e) => {
+  const handlePersonalUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: "", text: "" });
@@ -86,14 +87,14 @@ const HrProfileManagement = () => {
       });
       setUser(res.data.user);
       showMsg("success", "HR profile settings updated successfully!");
-    } catch (err) {
+    } catch (err: any) {
       showMsg("error", err.response?.data?.message || "Operation failed.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePasswordUpdate = async (securityData, callback) => {
+  const handlePasswordUpdate = async (securityData: any, callback: () => void) => {
     setLoading(true);
     setMessage({ type: "", text: "" });
     try {
@@ -102,10 +103,28 @@ const HrProfileManagement = () => {
       });
       showMsg("success", "Security credentials updated successfully!");
       if (callback) callback();
-    } catch (err) {
+    } catch (err: any) {
       showMsg("error", err.response?.data?.message || "Security update failed.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    setImageLoading(true);
+    try {
+      const res = await axios.put("http://localhost:3000/api/auth/profile-pic", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
+      setUser(res.data.user);
+      showMsg("success", "Profile picture updated successfully!");
+    } catch (err: any) {
+      showMsg("error", err.response?.data?.message || "Image upload failed.");
+    } finally {
+      setImageLoading(false);
     }
   };
 
@@ -133,6 +152,8 @@ const HrProfileManagement = () => {
           employmentInfo={employmentInfo}
           themeColor="indigo"
           stats={statsForCard}
+          onUpload={handleImageUpload}
+          isUploading={imageLoading}
         />
       }
     >
@@ -201,7 +222,7 @@ const HrProfileManagement = () => {
               />
             </ProfileField>
 
-            <ProfileField label="Date of Birth" themeColor="indigo">
+            <ProfileField label="Date of Birth" icon={Calendar} themeColor="indigo">
               <input
                 type="date"
                 value={personalInfo.dateOfBirth}
@@ -209,7 +230,7 @@ const HrProfileManagement = () => {
               />
             </ProfileField>
 
-            <ProfileField label="Gender Identity" themeColor="indigo">
+            <ProfileField label="Gender Identity" icon={User} themeColor="indigo">
               <select
                 value={personalInfo.gender}
                 onChange={(e) => setPersonalInfo({ ...personalInfo, gender: e.target.value })}

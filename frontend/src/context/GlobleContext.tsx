@@ -27,6 +27,8 @@ interface GlobleContextType {
   setHrStats: Dispatch<SetStateAction<any>>;
   managerStats: any;
   setManagerStats: Dispatch<SetStateAction<any>>;
+  empStats: any;
+  setEmpStats: Dispatch<SetStateAction<any>>;
 }
 
 export const GlobleContext = createContext<GlobleContextType | undefined>(undefined);
@@ -43,6 +45,7 @@ export const GlobleProvider = ({ children }: { children: ReactNode }) => {
   const [hrStats, setHrStats] = useState<any>(null);
   const [managerProjects, setManagerProjects] = useState<Project[]>([]);
   const [managerStats, setManagerStats] = useState<any>(null);
+  const [empStats, setEmpStats] = useState<any>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -101,7 +104,7 @@ export const GlobleProvider = ({ children }: { children: ReactNode }) => {
       user, setUser, loading, employeeList, setEmployeeList, departments, setDepartments, 
       projects, setProjects, empProject, setEmpProject, managerProjects, setManagerProjects,
       leaves, setLeaves, socket, logout, adminStats, setAdminStats, hrStats, setHrStats,
-      managerStats, setManagerStats
+      managerStats, setManagerStats, empStats, setEmpStats
     }}>
       {children}
     </GlobleContext.Provider>

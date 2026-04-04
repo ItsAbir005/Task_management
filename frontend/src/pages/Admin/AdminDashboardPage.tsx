@@ -11,7 +11,7 @@ import { GlobleContext } from "../../context/GlobleContext";
 import { useContext } from "react";
 
 const AdminDashboardPage = () => {
-  const { adminStats, setAdminStats } = useContext(GlobleContext);
+  const { adminStats, setAdminStats } = useContext(GlobleContext) as any;
   const [loading, setLoading] = useState(!adminStats);
 
   useEffect(() => {
@@ -47,6 +47,23 @@ const AdminDashboardPage = () => {
     );
   }
 
+  const handleGenerateReport = () => {
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + "Metric,Value\n"
+      + `Total Talent,${adminStats?.stats?.totalEmployees || 0}\n`
+      + `Departments,${adminStats?.stats?.totalDepartments || 0}\n`
+      + `Active Projects,${adminStats?.stats?.totalProjects || 0}\n`
+      + `Pending Leaves,${adminStats?.stats?.pendingLeaves || 0}\n`;
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `admin_report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const stats = [
     { title: "Total Talent", value: adminStats?.stats.totalEmployees, icon: Users, color: "blue", delay: 0 },
     { title: "Departments", value: adminStats?.stats.totalDepartments, icon: Building2, color: "indigo", delay: 0.1 },
@@ -76,7 +93,9 @@ const AdminDashboardPage = () => {
                 <Bell className="w-5 h-5 text-gray-600" />
                 <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
             </button>
-            <div className="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-600/20 flex items-center gap-2 hover:bg-blue-700 transition-all cursor-pointer">
+            <div 
+                onClick={handleGenerateReport}
+                className="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-600/20 flex items-center gap-2 hover:bg-blue-700 transition-all cursor-pointer">
                 <TrendingUp className="w-4 h-4" />
                 Generate Report
             </div>

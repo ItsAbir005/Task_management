@@ -11,7 +11,7 @@ import { GlobleContext } from "../../context/GlobleContext";
 import { useContext } from "react";
 
 const HrDashboard = () => {
-  const { hrStats, setHrStats } = useContext(GlobleContext);
+  const { hrStats, setHrStats } = useContext(GlobleContext) as any;
   const [loading, setLoading] = useState(!hrStats);
 
   useEffect(() => {
@@ -47,6 +47,23 @@ const HrDashboard = () => {
     );
   }
 
+  const handleLeaveReport = () => {
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + "Metric,Value\n"
+      + `Total Talent,${hrStats?.stats?.totalEmployees || 0}\n`
+      + `Departments,${hrStats?.stats?.totalDepartments || 0}\n`
+      + `Pending Leaves,${hrStats?.stats?.pendingLeaves || 0}\n`
+      + `Approved Leaves,${hrStats?.stats?.approvedLeaves || 0}\n`;
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `leave_report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const stats = [
     { title: "Total Talent", value: hrStats?.stats.totalEmployees, icon: Users, color: "indigo", delay: 0 },
     { title: "Departments", value: hrStats?.stats.totalDepartments, icon: Building2, color: "blue", delay: 0.1 },
@@ -78,7 +95,9 @@ const HrDashboard = () => {
                     <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
                 )}
             </button>
-            <div className="bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 flex items-center gap-2 hover:bg-indigo-700 transition-all cursor-pointer">
+            <div 
+                onClick={handleLeaveReport}
+                className="bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 flex items-center gap-2 hover:bg-indigo-700 transition-all cursor-pointer">
                 <TrendingUp className="w-4 h-4" />
                 Leave Report
             </div>

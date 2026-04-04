@@ -1,5 +1,5 @@
 import React from 'react'
-import HRProjectMang from '../../components/HR/HRProjectMAng'
+import HRProjectMang from '../../components/HR/HRProjectMang'
 
 const HrProManagement = () => {
   return (

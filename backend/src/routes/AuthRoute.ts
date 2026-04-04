@@ -12,8 +12,10 @@ import {
   registerEmployeesBulk,
   inviteHRManager,
   HRInviteEmployee,
+  uploadProfilePic,
 } from '../Controllers/AuthController.js';
 import { AuthenticateMiddleware, authorize } from '../middlewares/AuthMiddleware.js';
+import { uploadImage } from '../utils/cloudinary.js';
 
 const router = express.Router();
 
@@ -27,6 +29,7 @@ router.post('/setPassword', setEmployeePassword);
 router.get('/me', AuthenticateMiddleware, getMe);
 router.put('/updateMe', AuthenticateMiddleware, updateMe);
 router.put('/changePassword', AuthenticateMiddleware, changePassword);
+router.put('/profile-pic', AuthenticateMiddleware, uploadImage.single('image'), uploadProfilePic);
 router.post('/logout', logout);
 
 // ── Admin only ────────────────────────────────────────────────────────────────

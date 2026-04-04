@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Mail, Briefcase, Activity, Building2, LucideIcon } from "lucide-react";
+import { Mail, Briefcase, Activity, Building2, LucideIcon, Camera, Loader2 } from "lucide-react";
 
 interface InfoRowProps {
   icon: LucideIcon;
@@ -36,6 +36,8 @@ interface ProfileCardProps {
   employmentInfo: EmploymentInfo;
   themeColor?: string;
   stats?: StatItem[];
+  onUpload?: (file: File) => void;
+  isUploading?: boolean;
 }
 
 const InfoRow = ({ icon: Icon, label, value, themeColor = "violet" }: InfoRowProps) => {
@@ -61,7 +63,7 @@ const InfoRow = ({ icon: Icon, label, value, themeColor = "violet" }: InfoRowPro
   );
 };
 
-const ProfileCard = ({ user, personalInfo, employmentInfo, themeColor = "violet", stats = [] }: ProfileCardProps) => {
+const ProfileCard = ({ user, personalInfo, employmentInfo, themeColor = "violet", stats = [], onUpload, isUploading }: ProfileCardProps) => {
   // Resolve display name: prefer personalInfo state, fallback to user context, then admin `name`
   const displayFirst = personalInfo.firstName || user?.firstName || (user?.name ? user.name.split(' ')[0] : '') || '';
   const displayLast  = personalInfo.lastName  || user?.lastName  || (user?.name ? user.name.split(' ').slice(1).join(' ') : '') || '';
@@ -94,9 +96,41 @@ const ProfileCard = ({ user, personalInfo, employmentInfo, themeColor = "violet"
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50/40 via-transparent to-slate-50/30 pointer-events-none" />
         
         {/* Avatar */}
-        <div className="relative mx-auto w-28 h-28 mb-5">
-          <div className={`w-full h-full bg-gradient-to-br ${gradientClasses} rounded-full flex items-center justify-center text-white text-4xl font-black shadow-2xl select-none`}>
-            {initials}
+        <div className="relative mx-auto w-28 h-28 mb-5 group/avatar cursor-pointer">
+          <div className={`w-full h-full bg-gradient-to-br ${gradientClasses} rounded-full flex items-center justify-center text-white text-4xl font-black shadow-2xl select-none overflow-hidden border-4 border-white`}>
+            {user?.profilePic ? (
+              <img 
+                src={user.profilePic} 
+                alt="Profile" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              initials
+            )}
+            
+            {/* Upload Overlay */}
+            <div 
+              className="absolute inset-0 bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-full"
+              onClick={() => document.getElementById('profile-pic-input')?.click()}
+            >
+              {isUploading ? (
+                <Loader2 className="w-8 h-8 text-white animate-spin" />
+              ) : (
+                <Camera className="w-8 h-8 text-white" />
+              )}
+            </div>
+            
+            {/* Hidden Input */}
+            <input 
+              id="profile-pic-input"
+              type="file"
+              className="hidden"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file && onUpload) onUpload(file);
+              }}
+            />
           </div>
           <div className={`absolute bottom-1 right-1 w-5 h-5 ${dotClasses} rounded-full border-2 border-white shadow`} />
         </div>

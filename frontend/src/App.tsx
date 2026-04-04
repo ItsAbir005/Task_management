@@ -17,7 +17,6 @@ import HrDashboard from "./pages/HR/HrDashboard";
 import HrDepManagement from "./pages/HR/HrDepManagement";
 import HrProfileManagement from "./pages/HR/HrProfileManagement";
 import HrLeaveManagement from "./pages/HR/HrLeaveManagement";
-import HrEmpManagement from "./pages/HR/HrEmpManagement";
 import MangDashboard from "./pages/Manager/MangDashboard";
 import MangLeaveManagement from "./pages/Manager/MangLeaveManagement";
 import ManProfileManagement from "./pages/Manager/ManProfileManagement";
@@ -59,7 +58,6 @@ const App = () => {
           <Route path="department" element={<HrDepManagement />} />
           <Route path="profile" element={<HrProfileManagement />} />
           <Route path="leave" element={<HrLeaveManagement />} />
-          <Route path="employee" element={<HrEmpManagement />} />
           <Route path="invite" element={<HrInvitePage />} />
         </Route>
       </Route>

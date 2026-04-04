@@ -159,7 +159,7 @@ export const getEmpTasks = asyncHandler(async (req, res, next) => {
 
 export const updateEmpTaskStatus = asyncHandler(async (req, res, next) => {
     const { tenantId, employeeId } = req;
-    const { taskId } = req.params;
+    const taskId = req.params.taskId as string;
     const { status } = req.body;
 
     if (!status) {
@@ -180,11 +180,13 @@ export const updateEmpTaskStatus = asyncHandler(async (req, res, next) => {
         include: {
             creator: {
                 select: { id: true, firstName: true, lastName: true, email: true }
-            },
-            assignee: {
-                select: { firstName: true, lastName: true }
             }
         }
+    });
+
+    const assignee = await prisma.employee.findUnique({
+        where: { id: employeeId },
+        select: { firstName: true, lastName: true }
     });
 
     // Notify the creator (e.g. Manager/Admin) about the status update
@@ -192,7 +194,7 @@ export const updateEmpTaskStatus = asyncHandler(async (req, res, next) => {
         data: {
             userId: updatedTask.creatorId,
             title: "Task Status Updated",
-            message: `${updatedTask.assignee.firstName} ${updatedTask.assignee.lastName || ''} updated the status of task: ${updatedTask.title} to ${status}`,
+            message: `${assignee?.firstName} ${assignee?.lastName || ''} updated the status of task: ${updatedTask.title} to ${status}`,
             type: "TASK"
         }
     });
@@ -203,3 +205,71 @@ export const updateEmpTaskStatus = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({ success: true, message: "Task status updated successfully", task: updatedTask });
 });
+
+//---------------------------------------Get Employee Dashboard Stats---------------------------------------//
+
+export const getEmpDashboardStats = asyncHandler(async (req, res, next) => {
+    const { tenantId, employeeId } = req;
+
+    if (!tenantId || !employeeId) {
+        return res.status(400).json({ message: "tenantId and employeeId are required" });
+    }
+
+    const projectsCount = await prisma.project.count({
+        where: {
+            tenantId,
+            members: { some: { id: employeeId } }
+        }
+    });
+
+    const totalTasksCount = await prisma.task.count({
+        where: { tenantId, assigneeId: employeeId }
+    });
+
+    const pendingTasksCount = await prisma.task.count({
+        where: { tenantId, assigneeId: employeeId, status: "TODO" }
+    });
+
+    const inProgressTasksCount = await prisma.task.count({
+        where: { tenantId, assigneeId: employeeId, status: "IN_PROGRESS" }
+    });
+
+    const completedTasksCount = await prisma.task.count({
+        where: { tenantId, assigneeId: employeeId, status: "COMPLETED" }
+    });
+
+    const pendingLeavesCount = await prisma.leave.count({
+        where: { tenantId, employeeId, status: "PENDING" }
+    });
+
+    const approvedLeavesCount = await prisma.leave.count({
+        where: { tenantId, employeeId, status: "APPROVED" }
+    });
+
+    const recentTasks = await prisma.task.findMany({
+        where: { tenantId, assigneeId: employeeId },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        include: {
+            creator: { select: { firstName: true, lastName: true } }
+        }
+    });
+
+    res.status(200).json({
+        stats: {
+            totalProjects: projectsCount,
+            totalTasks: totalTasksCount,
+            pendingTasks: pendingTasksCount,
+            inProgressTasks: inProgressTasksCount,
+            completedTasks: completedTasksCount,
+            pendingLeaves: pendingLeavesCount,
+            approvedLeaves: approvedLeavesCount
+        },
+        recentActivity: recentTasks.map(task => ({
+            id: task.id,
+            action: `Assigned task: ${task.title}`,
+            date: task.createdAt,
+            user: `${task.creator.firstName} ${task.creator.lastName || ''}`
+        }))
+    });
+});

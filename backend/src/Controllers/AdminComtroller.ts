@@ -77,6 +77,25 @@ export const getEmployee = asyncHandler(async (req, res, next) => {
   });
 });
 
+//--------------------------------------------------------Update Employee------------------------------------//
+
+export const updateEmployee = asyncHandler(async (req, res, next) => {
+    const tenantId = req.tenantId;
+    const { employeeId } = req.params;
+    const { salary, status } = req.body;
+
+    const dataToUpdate: any = {};
+    if (salary !== undefined) dataToUpdate.salary = parseFloat(salary);
+    if (status !== undefined) dataToUpdate.status = status;
+
+    const updatedEmployee = await prisma.employee.updateMany({
+        where: { id: employeeId, tenantId },
+        data: dataToUpdate
+    });
+
+    res.status(200).json({ success: true, updatedEmployee });
+});
+
 //--------------------------------------------------------Delete Department------------------------------------//
 
 

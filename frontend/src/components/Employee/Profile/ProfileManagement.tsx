@@ -20,15 +20,16 @@ import {
 import { GlobleContext } from "../../../context/GlobleContext";
 
 // Shared Components
-import ProfileLayout from "../../Common/Profile/ProfileLayout";
-import ProfileHeader from "../../Common/Profile/ProfileHeader";
-import ProfileField from "../../Common/Profile/ProfileField";
-import ProfileCard from "../../Common/Profile/ProfileCard";
-import SecuritySection from "../../Common/Profile/SecuritySection";
+import ProfileLayout from "../../common/Profile/ProfileLayout";
+import ProfileHeader from "../../common/Profile/ProfileHeader";
+import ProfileField from "../../common/Profile/ProfileField";
+import ProfileCard from "../../common/Profile/ProfileCard";
+import SecuritySection from "../../common/Profile/SecuritySection";
 
 const ProfileManagement = () => {
-  const { user, setUser } = useContext(GlobleContext);
+  const { user, setUser } = useContext(GlobleContext) as any;
   const [loading, setLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(true);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [empStats, setEmpStats] = useState({
@@ -96,12 +97,12 @@ const ProfileManagement = () => {
     }
   };
 
-  const showMsg = (type, text) => {
+  const showMsg = (type: string, text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage({ type: "", text: "" }), 5000);
   };
 
-  const handlePersonalUpdate = async (e) => {
+  const handlePersonalUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: "", text: "" });
@@ -111,14 +112,14 @@ const ProfileManagement = () => {
       });
       setUser(res.data.user);
       showMsg("success", "Profile settings updated successfully!");
-    } catch (err) {
+    } catch (err: any) {
       showMsg("error", err.response?.data?.message || "Operation failed.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePasswordUpdate = async (securityData, callback) => {
+  const handlePasswordUpdate = async (securityData: any, callback: () => void) => {
     setLoading(true);
     setMessage({ type: "", text: "" });
     try {
@@ -130,10 +131,28 @@ const ProfileManagement = () => {
       });
       showMsg("success", "Security credentials updated successfully!");
       if (callback) callback();
-    } catch (err) {
+    } catch (err: any) {
       showMsg("error", err.response?.data?.message || "Security update failed.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    setImageLoading(true);
+    try {
+      const res = await axios.put("http://localhost:3000/api/auth/profile-pic", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
+      setUser(res.data.user);
+      showMsg("success", "Profile picture updated successfully!");
+    } catch (err: any) {
+      showMsg("error", err.response?.data?.message || "Image upload failed.");
+    } finally {
+      setImageLoading(false);
     }
   };
 
@@ -161,6 +180,8 @@ const ProfileManagement = () => {
           employmentInfo={employmentInfo}
           themeColor="violet"
           stats={statsForCard}
+          onUpload={handleImageUpload}
+          isUploading={imageLoading}
         />
       }
     >
@@ -229,7 +250,7 @@ const ProfileManagement = () => {
               />
             </ProfileField>
 
-            <ProfileField label="Date of Birth" themeColor="violet">
+            <ProfileField label="Date of Birth" icon={Calendar} themeColor="violet">
               <input
                 type="date"
                 value={personalInfo.dateOfBirth}
@@ -237,7 +258,7 @@ const ProfileManagement = () => {
               />
             </ProfileField>
 
-            <ProfileField label="Gender Identification" themeColor="violet">
+            <ProfileField label="Gender Identification" icon={User} themeColor="violet">
               <select
                 value={personalInfo.gender}
                 onChange={(e) => setPersonalInfo({ ...personalInfo, gender: e.target.value })}

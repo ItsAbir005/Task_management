@@ -1,37 +1,58 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import { Download, UserPlus, Building2, Users, BadgeDollarSign, UserCheck, UserX } from "lucide-react";
-const EmployeeStats = () => {
+import { GlobleContext } from "../../../context/GlobleContext";
 
-  // ✅ Raw Data instead of importing from assets
+const EmployeeStats = () => {
+  const { employeeList } = useContext(GlobleContext)!;
+
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+
+  const countHiredThisMonth = employeeList?.filter((emp: any) => {
+    const d = new Date(emp.createdAt);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  }).length || 0;
+
+  const terminatedEmployees = employeeList?.filter((e: any) => e.status?.toUpperCase() === 'TERMINATED') || [];
+  
+  const countTermThisMonth = terminatedEmployees.filter((emp: any) => {
+    const d = new Date(emp.updatedAt || emp.createdAt);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  }).length;
+
+  const employeesWithSalary = employeeList?.filter((e: any) => e.salary && e.salary > 0) || [];
+  const totalSalary = employeesWithSalary.reduce((acc, emp: any) => acc + (emp.salary || 0), 0);
+  const avgSalary = employeesWithSalary.length > 0 ? (totalSalary / employeesWithSalary.length) : 0;
+
   const stats = [
     {
       title: "Total Employees",
-      value: 250,
-      change: "+12 this month",
+      value: employeeList?.length || 0,
+      change: `+${countHiredThisMonth} this month`,
       trend: "positive",
       icon: Users,
       color: "bg-blue-500",
     },
     {
-      title: "Hired",
-      value: 18,
-      change: "+5 this month",
+      title: "Hired (This Month)",
+      value: countHiredThisMonth,
+      change: "Active hires",
       trend: "positive",
       icon: UserCheck,
       color: "bg-green-500",
     },
     {
       title: "Terminated",
-      value: 4,
-      change: "-1 this month",
+      value: terminatedEmployees.length,
+      change: `${countTermThisMonth} this month`,
       trend: "negative",
       icon: UserX,
       color: "bg-red-500",
     },
     {
       title: "Avg Salary",
-      value: "$75,000",
-      change: "+$3,200",
+      value: `$${Math.round(avgSalary).toLocaleString()}`,
+      change: "Active payroll",
       trend: "positive",
       icon: BadgeDollarSign,
       color: "bg-yellow-500",

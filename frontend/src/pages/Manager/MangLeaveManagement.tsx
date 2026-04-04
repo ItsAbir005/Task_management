@@ -9,7 +9,7 @@ import { GlobleContext } from "../../context/GlobleContext";
 
 const API = "http://localhost:3000/api/admin";
 
-const STATUS_CONFIG = {
+const STATUS_CONFIG: Record<string, any> = {
   PENDING:  { label: "Pending",  color: "amber",   bg: "bg-amber-50",  text: "text-amber-700",  border: "border-amber-200",  dot: "bg-amber-400"  },
   APPROVED: { label: "Approved", color: "emerald",  bg: "bg-emerald-50",text: "text-emerald-700",border: "border-emerald-200",dot: "bg-emerald-400" },
   REJECTED: { label: "Rejected", color: "rose",    bg: "bg-rose-50",   text: "text-rose-700",   border: "border-rose-200",   dot: "bg-rose-400"   },
@@ -18,10 +18,10 @@ const STATUS_CONFIG = {
 const TABS = ["ALL", "PENDING", "APPROVED", "REJECTED"];
 
 export default function MangLeaveManagement() {
-  const [leaves, setLeaves]     = useState([]);
+  const [leaves, setLeaves]     = useState<any[]>([]);
   const [loading, setLoading]   = useState(true);
   const [activeTab, setActiveTab] = useState("ALL");
-  const [updating, setUpdating] = useState(null); // leaveId being updated
+  const [updating, setUpdating] = useState<string | null>(null); // leaveId being updated
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -40,10 +40,10 @@ export default function MangLeaveManagement() {
 
   const filtered = activeTab === "ALL"
     ? leaves
-    : leaves.filter(l => l.managerStatus === activeTab);
+    : leaves.filter((l: any) => l.managerStatus === activeTab);
 
   // ── Action ─────────────────────────────────────────────────────────────────
-  const handleDecision = async (leaveId, managerStatus) => {
+  const handleDecision = async (leaveId: string, managerStatus: string) => {
     setUpdating(leaveId);
     try {
       const { data } = await axios.put(
@@ -52,8 +52,8 @@ export default function MangLeaveManagement() {
         { withCredentials: true }
       );
       // Optimistic update
-      setLeaves(prev =>
-        prev.map(l => l.id === leaveId ? { ...l, managerStatus, status: data.leave.status } : l)
+      setLeaves((prev: any[]) =>
+        prev.map((l: any) => l.id === leaveId ? { ...l, managerStatus, status: data.leave.status } : l)
       );
     } catch (err) {
       console.error("Error updating leave:", err);
@@ -63,7 +63,7 @@ export default function MangLeaveManagement() {
   };
 
   // ── Counts ─────────────────────────────────────────────────────────────────
-  const counts = {
+  const counts: Record<string, number> = {
     ALL:      leaves.length,
     PENDING:  leaves.filter(l => l.managerStatus === "PENDING").length,
     APPROVED: leaves.filter(l => l.managerStatus === "APPROVED").length,
@@ -148,7 +148,7 @@ export default function MangLeaveManagement() {
 // Sub-components
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const LeaveCard = ({ leave, index, updating, onDecision }) => {
+const LeaveCard = ({ leave, index, updating, onDecision }: any) => {
   const cfg = STATUS_CONFIG[leave.managerStatus] || STATUS_CONFIG.PENDING;
   const isPending = leave.managerStatus === "PENDING";
   const isUpdating = updating === leave.id;
@@ -156,7 +156,7 @@ const LeaveCard = ({ leave, index, updating, onDecision }) => {
   const emp = leave.employee;
   const initials = `${emp?.firstName?.[0] ?? ""}${emp?.lastName?.[0] ?? ""}`;
   const days = Math.ceil(
-    (new Date(leave.endDate) - new Date(leave.startDate)) / (1000 * 60 * 60 * 24)
+    (new Date(leave.endDate).getTime() - new Date(leave.startDate).getTime()) / (1000 * 60 * 60 * 24)
   ) + 1;
 
   return (
@@ -244,7 +244,7 @@ const LeaveCard = ({ leave, index, updating, onDecision }) => {
   );
 };
 
-const InfoPill = ({ icon, label, value }) => (
+const InfoPill = ({ icon, label, value }: any) => (
   <div className="flex flex-col gap-0.5 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2">
     <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
       {icon} {label}
@@ -253,7 +253,7 @@ const InfoPill = ({ icon, label, value }) => (
   </div>
 );
 
-const EmptyState = ({ tab }) => (
+const EmptyState = ({ tab }: any) => (
   <motion.div
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
