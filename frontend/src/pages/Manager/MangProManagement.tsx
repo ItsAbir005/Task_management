@@ -187,10 +187,10 @@ const MangProManagement = () => {
                   <div className="flex items-center gap-3">
                     <div className="relative w-full">
                       <select
-                        disabled={updatingId === project.id}
+                        disabled={updatingId === project.id || project.status === "COMPLETED"}
                         value={project.status}
                         onChange={(e) => handleStatusUpdate(project.id, e.target.value)}
-                        className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm font-bold rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all cursor-pointer shadow-sm hover:bg-slate-100 disabled:opacity-50"
+                        className={`w-full appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm font-bold rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${project.status === "COMPLETED" ? "cursor-not-allowed opacity-60" : "transition-all cursor-pointer shadow-sm hover:bg-slate-100"} disabled:opacity-50`}
                       >
                         <option value="ONGOING">Mark as Actionable</option>
                         <option value="PENDING">Move to Pending</option>

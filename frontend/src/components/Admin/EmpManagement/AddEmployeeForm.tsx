@@ -2,8 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { GlobleContext } from "../../../context/GlobleContext";
 
-const AddEmployeeForm = ({ onClose, onAdd }) => {
-  const { setEmployeeList } = useContext(GlobleContext);
+const AddEmployeeForm = ({ onClose, onAdd }: { onClose: () => void, onAdd?: (emp: any) => void }) => {
+  const { setEmployeeList, user } = useContext(GlobleContext)!;
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -13,13 +13,13 @@ const AddEmployeeForm = ({ onClose, onAdd }) => {
     role: "",
   });
 
-  const [departments, setDepartments] = useState([]);
+  const [departments, setDepartments] = useState<any[]>([]);
 
-  const roles = ["HR", "MANAGER", "EMPLOYEE"];
+  const roles = user?.role === "HR" ? ["EMPLOYEE"] : ["HR", "MANAGER", "EMPLOYEE"];
 
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -27,7 +27,7 @@ const AddEmployeeForm = ({ onClose, onAdd }) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
@@ -42,7 +42,7 @@ const AddEmployeeForm = ({ onClose, onAdd }) => {
 
       // Update global context list
       if (res.data.employee) {
-        setEmployeeList((prev) => [...prev, res.data.employee]);
+        setEmployeeList((prev: any) => [...prev, res.data.employee]);
       }
 
       // Call parent callback if it exists
@@ -70,6 +70,12 @@ const AddEmployeeForm = ({ onClose, onAdd }) => {
   useEffect(() => {
     getDepartment();
   }, []);
+
+  useEffect(() => {
+    if (user?.role === 'HR' && user?.departmentId) {
+      setFormData(prev => ({ ...prev, departmentId: user.departmentId || "" }));
+    }
+  }, [user]);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -152,8 +158,9 @@ const AddEmployeeForm = ({ onClose, onAdd }) => {
               name="departmentId"
               value={formData.departmentId}
               onChange={handleChange}
-              className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               required
+              disabled={user?.role === 'HR'}
             >
               <option value="">Select Department</option>
 

@@ -11,7 +11,7 @@ import {
   logout,
   registerEmployeesBulk,
   inviteHRManager,
-  managerInviteEmployee,
+  HRInviteEmployee,
 } from '../Controllers/AuthController.js';
 import { AuthenticateMiddleware, authorize } from '../middlewares/AuthMiddleware.js';
 
@@ -30,11 +30,11 @@ router.put('/changePassword', AuthenticateMiddleware, changePassword);
 router.post('/logout', logout);
 
 // ── Admin only ────────────────────────────────────────────────────────────────
-router.post('/addEmployee', AuthenticateMiddleware, authorize('ADMIN'), addEmployee);
+router.post('/addEmployee', AuthenticateMiddleware, authorize('ADMIN', 'HR'), addEmployee);
 router.post('/addInBulk', AuthenticateMiddleware, authorize('ADMIN'), registerEmployeesBulk);
 router.post('/inviteHRManager', AuthenticateMiddleware, authorize('ADMIN'), inviteHRManager);
 
-// ── Manager only ──────────────────────────────────────────────────────────────
-router.post('/inviteEmployee', AuthenticateMiddleware, authorize('MANAGER'), managerInviteEmployee);
+// ── HR only ──────────────────────────────────────────────────────────────
+router.post('/hrInviteEmployee', AuthenticateMiddleware, authorize('HR'), HRInviteEmployee);
 
 export default router;

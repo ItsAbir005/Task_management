@@ -119,7 +119,22 @@ const ProfileCard = ({ user, personalInfo, employmentInfo, themeColor = "violet"
         {/* Info rows */}
         <div className="mt-8 space-y-4 text-left border-t border-slate-50 pt-7">
           <InfoRow icon={Mail} label="Corporate Email" value={user?.email || "—"} themeColor={themeColor} />
-          <InfoRow icon={Briefcase} label="Position · Department" value={`${personalInfo.position || "—"} · ${employmentInfo.department}`} themeColor={themeColor} />
+          {(() => {
+            let displayPosition = personalInfo.position;
+            if (!displayPosition || displayPosition === "—") {
+              if (user?.role === "ADMIN" || user?.role === "TENANT") {
+                displayPosition = "System Administrator";
+              } else {
+                const deptPrefix = (employmentInfo.department || "").replace(" Dept", "").replace(" Department", "");
+                if (user?.role === "MANAGER") displayPosition = deptPrefix !== "Unassigned" ? `${deptPrefix} Manager` : "Manager";
+                else if (user?.role === "HR") displayPosition = deptPrefix !== "Unassigned" ? `${deptPrefix} HR Manager` : "HR Manager";
+                else displayPosition = "Employee";
+              }
+            }
+            return (
+              <InfoRow icon={Briefcase} label="Position · Department" value={`${displayPosition} · ${employmentInfo.department}`} themeColor={themeColor} />
+            );
+          })()}
           <InfoRow icon={Activity} label="Employment Type" value={employmentInfo.employmentType?.replace("_", " ") || "—"} themeColor={themeColor} />
         </div>
       </div>

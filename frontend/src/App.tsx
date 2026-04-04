@@ -12,9 +12,9 @@ import ProManagement from "./pages/Admin/ProManagement";
 import ProfieManagement from "./pages/Admin/ProfieManagement";
 import EmpManagement from "./pages/Admin/EmpManagement";
 import InvitePage from "./pages/Admin/InvitePage";
+import HrInvitePage from "./pages/HR/HrInvitePage";
 import HrDashboard from "./pages/HR/HrDashboard";
 import HrDepManagement from "./pages/HR/HrDepManagement";
-import HrProManagement from "./pages/HR/HrProManagement";
 import HrProfileManagement from "./pages/HR/HrProfileManagement";
 import HrLeaveManagement from "./pages/HR/HrLeaveManagement";
 import HrEmpManagement from "./pages/HR/HrEmpManagement";
@@ -23,7 +23,6 @@ import MangLeaveManagement from "./pages/Manager/MangLeaveManagement";
 import ManProfileManagement from "./pages/Manager/ManProfileManagement";
 import MangProManagement from "./pages/Manager/MangProManagement";
 import TaskManagementPage from "./pages/Manager/TaskManagementPage";
-import ManagerInvitePage from "./pages/Manager/ManagerInvitePage";
 import EmpDashboard from "./pages/Employee/EmpDashboard";
 import EmpTaskManagement from "./pages/Employee/EmpTaskManagement";
 import EmpProfileManagement from "./pages/Employee/EmpProfileManagement";
@@ -58,10 +57,10 @@ const App = () => {
         <Route path="/hr" element={<MainLayout />}>
           <Route path="dashboard" element={<HrDashboard />} />
           <Route path="department" element={<HrDepManagement />} />
-          <Route path="project" element={<HrProManagement />} />
           <Route path="profile" element={<HrProfileManagement />} />
           <Route path="leave" element={<HrLeaveManagement />} />
           <Route path="employee" element={<HrEmpManagement />} />
+          <Route path="invite" element={<HrInvitePage />} />
         </Route>
       </Route>
 
@@ -73,7 +72,6 @@ const App = () => {
           <Route path="profilemanagement" element={<ManProfileManagement />} />
           <Route path="leavemanagement" element={<MangLeaveManagement />} />
           <Route path="taskmanagement" element={<TaskManagementPage />} />
-          <Route path="invite" element={<ManagerInvitePage />} />
         </Route>
       </Route>
 

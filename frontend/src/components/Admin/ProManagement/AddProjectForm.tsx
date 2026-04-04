@@ -2,17 +2,15 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { GlobleContext } from "../../../context/GlobleContext";
 
-export default function AddProjectForm({ onClose, onCreateProject }) {
+export default function AddProjectForm({ onClose, onCreateProject }: { onClose: () => void, onCreateProject: (proj: any) => void }) {
   const [newProject, setNewProject] = useState({
     name: "",
     client: "",
     managerId: "",
     deadline: "",
-    memberIds: [],
   });
 
-  const { employeeList, setEmployeeList } = useContext(GlobleContext);
-  const [employeeInput, setEmployeeInput] = useState("");
+  const { employeeList, setEmployeeList } = useContext(GlobleContext)!;
 
   useEffect(() => {
     getEmployee();
@@ -30,7 +28,7 @@ export default function AddProjectForm({ onClose, onCreateProject }) {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const payload = {
@@ -38,7 +36,6 @@ export default function AddProjectForm({ onClose, onCreateProject }) {
       client: newProject.client,
       managerId: newProject.managerId,
       deadline: newProject.deadline,
-      memberIds: newProject.memberIds,
     };
 
     try {
@@ -105,67 +102,12 @@ export default function AddProjectForm({ onClose, onCreateProject }) {
             required
           >
             <option value="">Select Manager</option>
-            {employeeList.map((m) => (
+            {employeeList.filter((m: any) => m.role === "MANAGER").map((m: any) => (
               <option key={m.id} value={m.id}>
-                {m.firstName}
+                {m.firstName} {m.lastName} ({m.department?.name || 'No Dept'})
               </option>
             ))}
           </select>
-
-          <div className="flex gap-2 mt-2">
-            <select
-              value={employeeInput}
-              onChange={(e) => setEmployeeInput(e.target.value)}
-              className="border rounded-lg p-2 flex-1 cursor-pointer"
-            >
-              <option value="">Select Employee</option>
-              {employeeList.map((emp) => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.firstName}
-                </option>
-              ))}
-            </select>
-
-            <button
-              type="button"
-              onClick={() => {
-                if (!employeeInput) return;
-
-                setNewProject((prev) => ({
-                  ...prev,
-                  memberIds: [...prev.memberIds, employeeInput],
-                }));
-
-                setEmployeeInput("");
-              }}
-              className="px-3 py-2 bg-green-600 text-white rounded-lg"
-            >
-              Add
-            </button>
-          </div>
-
-          <ul className="list-disc list-inside text-gray-700 mt-2">
-            {newProject.memberIds.map((empId, i) => {
-              const emp = employeeList.find((e) => e.id === empId);
-              return (
-                <li key={i}>
-                  {emp ? emp.firstName : empId}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setNewProject((prev) => ({
-                        ...prev,
-                        memberIds: prev.memberIds.filter((_, idx) => idx !== i),
-                      }))
-                    }
-                    className="text-sm text-red-600 ml-2"
-                  >
-                    Remove
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
 
           <div className="flex justify-end gap-3 mt-1">
             <button

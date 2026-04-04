@@ -6,11 +6,8 @@ import { useEffect } from "react";
 import axios from "axios";
 import { GlobleContext } from "../../../context/GlobleContext";
 
-import AddEmployeeForm from "./AddEmployeeForm";
-
 const EmployeeList = () => {
-  const { employeeList, setEmployeeList } = useContext(GlobleContext);
-  const [showForm, setShowForm] = useState(false);
+  const { employeeList, setEmployeeList } = useContext(GlobleContext)!;
 
 
   const getEmployee = async () => {
@@ -47,7 +44,7 @@ const EmployeeList = () => {
 
           <tbody>
             {employeeList && employeeList.length > 0 ? (
-              employeeList.map((emp) => (
+              employeeList!.map((emp: any) => (
                 <tr
                   key={emp.id}
                   className="hover:bg-gray-50 transition-colors duration-200"
@@ -85,14 +82,8 @@ const EmployeeList = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center py-6 text-gray-500">
+                <td colSpan={7} className="text-center py-6 text-gray-500">
                   No employees found.
-                  <button
-                    onClick={() => setShowForm(true)}
-                    className="text-blue-600 underline ml-1 cursor-pointer"
-                  >
-                    Add Employee
-                  </button>
                 </td>
               </tr>
             )}
@@ -100,12 +91,6 @@ const EmployeeList = () => {
         </table>
       </div>
 
-      {showForm && (
-        <AddEmployeeForm
-          onClose={() => setShowForm(false)}
-          onAdd={(newEmp) => setEmployeeList((prev) => [...prev, newEmp])}
-        />
-      )}
     </div>
   );
 };

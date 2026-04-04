@@ -152,8 +152,8 @@ export const inviteHRManager = asyncHandler(async (req: Request, res: Response) 
   const { firstName, lastName, email, role, departmentId } = req.body;
   const tenantId = (req as any).tenantId;
 
-  if (!['HR', 'MANAGER'].includes(role)) {
-    return res.status(400).json({ message: "Role must be HR or MANAGER" });
+  if (!['HR', 'MANAGER', 'EMPLOYEE'].includes(role)) {
+    return res.status(400).json({ message: "Role must be HR, MANAGER, or EMPLOYEE" });
   }
 
   const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
@@ -206,18 +206,18 @@ export const inviteHRManager = asyncHandler(async (req: Request, res: Response) 
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  MANAGER INVITE EMPLOYEE
+//  HR INVITE EMPLOYEE
 // ─────────────────────────────────────────────────────────────────────────────
-export const managerInviteEmployee = asyncHandler(async (req: Request, res: Response) => {
+export const HRInviteEmployee = asyncHandler(async (req: Request, res: Response) => {
   const { firstName, lastName, email, departmentId, salary } = req.body;
   const tenantId = (req as any).tenantId;
-  const managerId = (req as any).employeeId;
+  const hrId = (req as any).employeeId;
 
   const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
   if (!tenant) return res.status(404).json({ message: "Tenant not found" });
 
-  const manager = await prisma.employee.findUnique({ where: { id: managerId } });
-  if (!manager) return res.status(404).json({ message: "Manager not found" });
+  const hrManager = await prisma.employee.findUnique({ where: { id: hrId } });
+  if (!hrManager) return res.status(404).json({ message: "HR Manager not found" });
 
   const existing = await prisma.employee.findFirst({ where: { email, tenantId } });
   if (existing) return res.status(400).json({ message: "Employee with this email already exists" });
@@ -247,15 +247,15 @@ export const managerInviteEmployee = asyncHandler(async (req: Request, res: Resp
 
   const link = `${config.frontendUrl}/set-password?token=${token}`;
 
-  let emailWarning = null;
+  let emailWarning: string | null = null;
   try {
     await sendEmail(
       newEmployee.email,
       `You're invited to join ${tenant.name}`,
-      `Hello ${firstName},\n\nYour manager ${manager.firstName} ${manager.lastName || ''} has invited you to join ${tenant.name}.\n\n${deptRecord ? `Department: ${deptRecord.name}\n\n` : ''}Please set your password using the link below:\n\n${link}\n\nThis link will expire in 48 hours.\n\nWelcome to the team! 🚀`
+      `Hello ${firstName},\n\nHR Management has invited you to join ${tenant.name}.\n\n${deptRecord ? `Department: ${deptRecord.name}\n\n` : ''}Please set your password using the link below:\n\n${link}\n\nThis link will expire in 48 hours.\n\nWelcome to the team! 🚀`
     );
   } catch (emailErr) {
-    console.error('⚠️ Manager invite email failed (employee still created):', emailErr);
+    console.error('⚠️ HR employee invite email failed:', emailErr);
     emailWarning = `Employee created but invite email could not be sent. Share this setup link manually: ${link}`;
   }
 
@@ -375,8 +375,8 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
       select: {
         id: true, firstName: true, lastName: true, email: true, role: true, tenantId: true,
         phone: true, dateOfBirth: true, gender: true, position: true, salary: true,
-        dateOfJoining: true, employmentType: true, status: true,
-        department: { select: { name: true } },
+        dateOfJoining: true, employmentType: true, status: true, departmentId: true,
+        department: { select: { id: true, name: true } },
       },
     });
   }
@@ -408,8 +408,8 @@ export const updateMe = asyncHandler(async (req: Request, res: Response) => {
       select: {
         id: true, firstName: true, lastName: true, email: true, role: true, tenantId: true,
         phone: true, dateOfBirth: true, gender: true, position: true, salary: true,
-        dateOfJoining: true, employmentType: true, status: true,
-        department: { select: { name: true } },
+        dateOfJoining: true, employmentType: true, status: true, departmentId: true,
+        department: { select: { id: true, name: true } },
       },
     });
   }
@@ -418,9 +418,6 @@ export const updateMe = asyncHandler(async (req: Request, res: Response) => {
 });
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  CHANGE PASSWORD
-// ─────────────────────────────────────────────────────────────────────────────
 export const changePassword = asyncHandler(async (req: Request, res: Response) => {
   const { tenantId, employeeId } = req as any;
   const { currentPassword, newPassword } = req.body;

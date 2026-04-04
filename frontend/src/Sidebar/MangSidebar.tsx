@@ -21,7 +21,6 @@ const menuItems = [
   { title: "Project Management", to: "/manager/projectmanagement", icon: <Calendar size={20} /> },
   { title: "Task Management", to: "/manager/taskmanagement", icon: <CheckSquare size={20} /> },
   { title: "Leave Management", to: "/manager/leavemanagement", icon: <Palmtree size={20} /> },
-  { title: "Invite Employee", to: "/manager/invite", icon: <UserPlus size={20} /> },
   { title: "Profile Management", to: "/manager/profilemanagement", icon: <Settings size={20} /> },
 ];
 

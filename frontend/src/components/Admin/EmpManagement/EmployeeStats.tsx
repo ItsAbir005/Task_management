@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import { Download, UserPlus, Building2, Users, BadgeDollarSign, UserCheck, UserX } from "lucide-react";
-import AddEmployeeForm from "./AddEmployeeForm";
-import CreateDepartmentForm from "./CreateDepartmentForm";
-
 const EmployeeStats = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [showDeptForm, setShowDeptForm] = useState(false);
 
   // ✅ Raw Data instead of importing from assets
   const stats = [
@@ -60,24 +55,6 @@ const EmployeeStats = () => {
             <Download className="w-4 h-4" />
             Export
           </button>
-
-          {/* Create Department */}
-          <button
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow-sm hover:bg-green-700 cursor-pointer"
-            onClick={() => setShowDeptForm(true)}
-          >
-            <Building2 className="w-4 h-4" />
-            Create Department
-          </button>
-
-          {/* Add Employee */}
-          <button
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 cursor-pointer"
-            onClick={() => setShowForm(true)}
-          >
-            <UserPlus className="w-4 h-4" />
-            Add Employee
-          </button>
         </div>
       </div>
 
@@ -109,9 +86,6 @@ const EmployeeStats = () => {
         })}
       </div>
 
-      {/* Modals */}
-      {showForm && <AddEmployeeForm onClose={() => setShowForm(false)} />}
-      {showDeptForm && <CreateDepartmentForm onClose={() => setShowDeptForm(false)} />}
     </div>
   );
 };

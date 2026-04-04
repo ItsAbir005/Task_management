@@ -12,14 +12,15 @@ import {
   Menu,
   X,
   Palmtree,
+  UserPlus
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const menuItems = [
   { title: "Dashboard", to: "/hr/dashboard", icon: <LayoutDashboard size={20} /> },
   { title: "Employee Management", to: "/hr/employee", icon: <Users size={20} /> },
+  { title: "Invite Employee", to: "/hr/invite", icon: <UserPlus size={20} /> },
   { title: "Department Management", to: "/hr/department", icon: <CheckSquare size={20} /> },
-  { title: "Project Management", to: "/hr/project", icon: <Calendar size={20} /> },
   { title: "Leave Management", to: "/hr/leave", icon: <Palmtree size={20} /> },
   { title: "Profile Management", to: "/hr/profile", icon: <Settings size={20} /> },
 ];

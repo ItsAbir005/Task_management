@@ -18,26 +18,26 @@ import {
 } from "lucide-react";
 
 const EmpTaskManagement = () => {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [updatingId, setUpdatingId] = useState(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState("grid");
   const [filter, setFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const priorityColors = {
+  const priorityColors: Record<string, string> = {
     LOW: "bg-blue-50 text-blue-700 border-blue-100",
     MEDIUM: "bg-amber-50 text-amber-700 border-amber-100",
     HIGH: "bg-rose-50 text-rose-700 border-rose-100",
   };
 
-  const statusThemes = {
+  const statusThemes: Record<string, string> = {
     TODO: "from-slate-500 to-slate-600 shadow-slate-200",
     IN_PROGRESS: "from-violet-500 to-violet-600 shadow-violet-200",
     COMPLETED: "from-emerald-500 to-emerald-600 shadow-emerald-200",
   };
 
-  const statusBg = {
+  const statusBg: Record<string, string> = {
     TODO: "bg-slate-50 text-slate-600 border-slate-100",
     IN_PROGRESS: "bg-violet-50 text-violet-700 border-violet-100",
     COMPLETED: "bg-emerald-50 text-emerald-700 border-emerald-100",
@@ -58,7 +58,7 @@ const EmpTaskManagement = () => {
     }
   };
 
-  const handleStatusUpdate = async (taskId, newStatus) => {
+  const handleStatusUpdate = async (taskId: string, newStatus: string) => {
     setUpdatingId(taskId);
     try {
       const res = await axios.patch(
@@ -240,31 +240,40 @@ const EmpTaskManagement = () => {
                 </div>
 
                 <div className="mt-6 flex gap-2">
-                  {task.status !== 'TODO' && (
+                  {task.status !== "COMPLETED" ? (
+                    <>
+                      {task.status !== "TODO" && (
+                        <button
+                          disabled={updatingId === task.id}
+                          onClick={() => handleStatusUpdate(task.id, "TODO")}
+                          className="flex-1 py-3.5 bg-slate-50 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all"
+                        >
+                          Restart
+                        </button>
+                      )}
+                      {task.status !== "IN_PROGRESS" && (
+                        <button
+                          disabled={updatingId === task.id}
+                          onClick={() => handleStatusUpdate(task.id, "IN_PROGRESS")}
+                          className="flex-1 py-3.5 bg-violet-50 text-violet-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-violet-100 transition-all"
+                        >
+                          In Progress
+                        </button>
+                      )}
+                      <button
+                        disabled={updatingId === task.id}
+                        onClick={() => handleStatusUpdate(task.id, "COMPLETED")}
+                        className="flex-1 py-3.5 bg-emerald-50 text-emerald-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-all shadow-lg shadow-emerald-50"
+                      >
+                        Finish
+                      </button>
+                    </>
+                  ) : (
                     <button
-                      disabled={updatingId === task.id}
-                      onClick={() => handleStatusUpdate(task.id, 'TODO')}
-                      className="flex-1 py-3.5 bg-slate-50 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all"
+                      disabled
+                      className="flex-1 py-3.5 bg-emerald-50 text-emerald-600/60 cursor-not-allowed rounded-2xl text-[10px] font-black uppercase tracking-widest"
                     >
-                      Restart
-                    </button>
-                  )}
-                  {task.status !== 'IN_PROGRESS' && (
-                    <button
-                      disabled={updatingId === task.id}
-                      onClick={() => handleStatusUpdate(task.id, 'IN_PROGRESS')}
-                      className="flex-1 py-3.5 bg-violet-50 text-violet-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-violet-100 transition-all"
-                    >
-                      In Progress
-                    </button>
-                  )}
-                  {task.status !== 'COMPLETED' && (
-                    <button
-                      disabled={updatingId === task.id}
-                      onClick={() => handleStatusUpdate(task.id, 'COMPLETED')}
-                      className="flex-1 py-3.5 bg-emerald-50 text-emerald-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-all shadow-lg shadow-emerald-50"
-                    >
-                      Finish
+                      Completed
                     </button>
                   )}
                 </div>
@@ -320,10 +329,10 @@ const EmpTaskManagement = () => {
                     </td>
                     <td className="px-10 py-6 text-right">
                       <select
-                        disabled={updatingId === task.id}
+                        disabled={updatingId === task.id || task.status === "COMPLETED"}
                         value={task.status}
                         onChange={(e) => handleStatusUpdate(task.id, e.target.value)}
-                        className={`text-[9px] font-black uppercase tracking-widest rounded-xl px-4 py-2 border border-slate-100 bg-white shadow-sm outline-none cursor-pointer focus:ring-2 focus:ring-violet-500 transition-all ${updatingId === task.id ? 'opacity-50' : ''}`}
+                        className={`text-[9px] font-black uppercase tracking-widest rounded-xl px-4 py-2 border border-slate-100 shadow-sm outline-none transition-all ${updatingId === task.id ? 'opacity-50' : ''} ${task.status === "COMPLETED" ? 'bg-emerald-50 text-emerald-600 cursor-not-allowed opacity-60' : 'bg-white cursor-pointer focus:ring-2 focus:ring-violet-500'}`}
                       >
                         <option value="TODO">Backlog</option>
                         <option value="IN_PROGRESS">Executing</option>

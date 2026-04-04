@@ -22,8 +22,8 @@ import {
 import { GlobleContext } from "../../../context/GlobleContext";
 
 const TaskManagement = () => {
-  const [tasks, setTasks] = useState([]);
-  const [employees, setEmployees] = useState([]);
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -38,13 +38,13 @@ const TaskManagement = () => {
     assigneeId: "",
   });
 
-  const priorityColors = {
+  const priorityColors: Record<string, string> = {
     LOW: "bg-blue-50 text-blue-700 border-blue-100",
     MEDIUM: "bg-amber-50 text-amber-700 border-amber-100",
     HIGH: "bg-rose-50 text-rose-700 border-rose-100",
   };
 
-  const statusColors = {
+  const statusColors: Record<string, string> = {
     TODO: "bg-slate-100 text-slate-600",
     IN_PROGRESS: "bg-emerald-100 text-emerald-700",
     COMPLETED: "bg-teal-600 text-white shadow-lg shadow-teal-600/20",
@@ -69,7 +69,7 @@ const TaskManagement = () => {
     }
   };
 
-  const handleCreateTask = async (e) => {
+  const handleCreateTask = async (e: any) => {
     e.preventDefault();
     setSubmitting(true);
     try {
@@ -86,18 +86,7 @@ const TaskManagement = () => {
     }
   };
 
-  const handleUpdateStatus = async (taskId, newStatus) => {
-    try {
-      const res = await axios.put(`http://localhost:3000/api/admin/manager-task/${taskId}`, { status: newStatus }, {
-        withCredentials: true,
-      });
-      setTasks(tasks.map(t => t.id === taskId ? res.data.task : t));
-    } catch (err) {
-      console.error("Error updating status:", err);
-    }
-  };
-
-  const handleDeleteTask = async (taskId) => {
+  const handleDeleteTask = async (taskId: string) => {
     if (!window.confirm("Are you sure you want to delete this task?")) return;
     try {
       await axios.delete(`http://localhost:3000/api/admin/manager-task/${taskId}`, {
@@ -237,15 +226,11 @@ const TaskManagement = () => {
                         {task.assignee?.firstName} {task.assignee?.lastName || ""}
                       </span>
                     </div>
-                    <select
-                      value={task.status}
-                      onChange={(e) => handleUpdateStatus(task.id, e.target.value)}
-                      className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl border-none outline-none ring-0 ${statusColors[task.status] || "bg-slate-100 text-slate-600"}`}
-                    >
-                      <option value="TODO">Todo</option>
-                      <option value="IN_PROGRESS">In Progress</option>
-                      <option value="COMPLETED">Completed</option>
-                    </select>
+                    <div className="flex gap-2">
+                      <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl ${statusColors[task.status] || "bg-slate-100 text-slate-600"}`}>
+                        {task.status.replace("_", " ")}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -285,15 +270,9 @@ const TaskManagement = () => {
                       </span>
                     </td>
                     <td className="px-8 py-5">
-                      <select
-                        value={task.status}
-                        onChange={(e) => handleUpdateStatus(task.id, e.target.value)}
-                        className={`text-[9px] font-black uppercase tracking-widest rounded-lg px-2 py-1 border-none outline-none ${statusColors[task.status]}`}
-                      >
-                        <option value="TODO">Todo</option>
-                        <option value="IN_PROGRESS">In Progress</option>
-                        <option value="COMPLETED">Completed</option>
-                      </select>
+                      <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg ${statusColors[task.status] || "bg-slate-100 text-slate-600"}`}>
+                        {task.status.replace("_", " ")}
+                      </span>
                     </td>
                     <td className="px-8 py-5 text-right">
                       <button onClick={() => handleDeleteTask(task.id)} className="p-2 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100">

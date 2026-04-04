@@ -1,15 +1,21 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { GlobleContext } from "../../context/GlobleContext";
-import { Mail, UserPlus, Send, CheckCircle, Building2, ChevronDown } from "lucide-react";
+import { Mail, UserPlus, Send, CheckCircle, ChevronDown } from "lucide-react";
 
-const InvitePage = () => {
+const HrInvitePage = () => {
   const { user, departments } = useContext(GlobleContext)!;
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", role: "HR", departmentId: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", role: "EMPLOYEE", departmentId: "" });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [setupLink, setSetupLink] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (user?.departmentId) {
+      setForm(prev => ({ ...prev, departmentId: user.departmentId || "" }));
+    }
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -25,7 +31,7 @@ const InvitePage = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/auth/inviteHRManager",
+        "http://localhost:3000/api/auth/hrInviteEmployee",
         form,
         { withCredentials: true }
       );
@@ -35,19 +41,13 @@ const InvitePage = () => {
       } else {
         setSetupLink("");
       }
-      setForm({ firstName: "", lastName: "", email: "", role: "HR", departmentId: "" });
+      setForm(prev => ({ ...prev, firstName: "", lastName: "", email: "" }));
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to send invite. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-
-  const inviteStats = [
-    { icon: "🏢", label: "Invite HR Manager", desc: "HR will handle leaves, employees & compliance", value: "HR" },
-    { icon: "📊", label: "Invite Manager", desc: "Managers will invite employees & manage projects", value: "MANAGER" },
-    { icon: "👥", label: "Invite Employee", desc: "Standard employee with no admin rights", value: "EMPLOYEE" },
-  ];
 
   return (
     <div style={{ padding: "32px", fontFamily: "'Inter', sans-serif", maxWidth: "900px" }}>
@@ -57,35 +57,11 @@ const InvitePage = () => {
       <div style={{ marginBottom: "32px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
           <UserPlus size={24} color="#6c63ff" />
-          <h1 style={{ fontSize: "24px", fontWeight: 800, color: "#1e1b4b", margin: 0 }}>Invite Team Members</h1>
+          <h1 style={{ fontSize: "24px", fontWeight: 800, color: "#1e1b4b", margin: 0 }}>Invite Employees</h1>
         </div>
         <p style={{ color: "#6b7280", margin: 0 }}>
-          As Admin, invite HR Managers & Managers to your organization. They will receive an email invite to set their password.
+          Send invitations to new employees. They will automatically be assigned to your department.
         </p>
-      </div>
-
-      {/* Info cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px", marginBottom: "32px" }}>
-        {inviteStats.map(stat => (
-          <div
-            key={stat.value}
-            onClick={() => setForm(prev => ({ ...prev, role: stat.value }))}
-            style={{
-              background: form.role === stat.value
-                ? "linear-gradient(135deg, #6c63ff15, #a855f720)"
-                : "#f9fafb",
-              border: form.role === stat.value ? "2px solid #6c63ff" : "2px solid #e5e7eb",
-              borderRadius: "16px",
-              padding: "20px",
-              cursor: "pointer",
-              transition: "all 0.2s",
-            }}
-          >
-            <div style={{ fontSize: "28px", marginBottom: "8px" }}>{stat.icon}</div>
-            <div style={{ fontWeight: 700, color: "#1e1b4b", marginBottom: "4px" }}>{stat.label}</div>
-            <div style={{ fontSize: "13px", color: "#6b7280" }}>{stat.desc}</div>
-          </div>
-        ))}
       </div>
 
       {/* Form card */}
@@ -99,7 +75,7 @@ const InvitePage = () => {
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "24px" }}>
           <Send size={18} color="#6c63ff" />
           <h2 style={{ fontSize: "16px", fontWeight: 700, color: "#1e1b4b", margin: 0 }}>
-            Send Invite Email — {form.role === "HR" ? "HR Manager" : form.role === "MANAGER" ? "Manager" : "Employee"}
+            Send Employee Invite Email
           </h2>
         </div>
 
@@ -130,7 +106,7 @@ const InvitePage = () => {
             marginTop: "8px",
           }}>
             <p style={{ color: "#92400e", fontWeight: 700, fontSize: "13px", margin: "0 0 6px" }}>
-              ⚠️ Email could not be delivered — share this link manually:
+              ⚠️ Email could not be delivered — share this setup link manually:
             </p>
             <div style={{
               background: "#fff",
@@ -208,7 +184,7 @@ const InvitePage = () => {
               <input
                 type="email"
                 name="email"
-                placeholder="hr@company.com"
+                placeholder="employee@company.com"
                 value={form.email}
                 onChange={handleChange}
                 required
@@ -221,32 +197,27 @@ const InvitePage = () => {
             {/* Role */}
             <div>
               <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#374151", marginBottom: "6px" }}>
-                Role *
+                Role
               </label>
-              <div style={{ position: "relative" }}>
-                <select name="role" value={form.role} onChange={handleChange} style={{ ...inputStyle, appearance: "none", cursor: "pointer", paddingRight: "36px" }}>
-                  <option value="HR">HR Manager</option>
-                  <option value="MANAGER">Manager</option>
-                  <option value="EMPLOYEE">Employee</option>
-                </select>
-                <ChevronDown size={15} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", color: "#9ca3af", pointerEvents: "none" }} />
-              </div>
+              <input
+                type="text"
+                value="Employee"
+                disabled
+                style={{ ...inputStyle, background: "#f3f4f6", cursor: "not-allowed", color: "#6b7280" }}
+              />
             </div>
 
-            {/* Department (optional) */}
+            {/* Department */}
             <div>
               <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#374151", marginBottom: "6px" }}>
-                Department (Optional)
+                Department
               </label>
-              <div style={{ position: "relative" }}>
-                <select name="departmentId" value={form.departmentId} onChange={handleChange} style={{ ...inputStyle, appearance: "none", cursor: "pointer", paddingRight: "36px" }}>
-                  <option value="">No Department</option>
-                  {departments.map((d: any) => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
-                  ))}
-                </select>
-                <ChevronDown size={15} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", color: "#9ca3af", pointerEvents: "none" }} />
-              </div>
+              <input
+                type="text"
+                value={user?.department?.name || "Loading..."}
+                disabled
+                style={{ ...inputStyle, background: "#f3f4f6", cursor: "not-allowed", color: "#6b7280" }}
+              />
             </div>
           </div>
 
@@ -295,4 +266,4 @@ const inputStyle: React.CSSProperties = {
   transition: "border 0.2s",
 };
 
-export default InvitePage;
+export default HrInvitePage;
