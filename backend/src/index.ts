@@ -12,6 +12,7 @@ import { Server } from 'socket.io';
 import router from './routes/AuthRoute.js';
 import router1 from './routes/AdminRoute.js';
 import stripeRouter from './routes/StripeRoute.js';
+import notificationRouter from './routes/NotificationRoute.js';
 import { startCronJobs } from './workflows/cron.js';
 import { initWorkflowEngine } from './workflows/engine.js';
 import { SocketAuth } from './middlewares/SocketAuth.js';
@@ -98,6 +99,7 @@ io.use(SocketAuth);
 app.use('/api/auth', router);
 app.use('/api/admin', router1);
 app.use('/api/stripe', stripeRouter);
+app.use('/api/notifications', notificationRouter);
 
 // Standard Error Handler (Always last)
 app.use(errorMiddleware);
@@ -106,19 +108,25 @@ app.use(errorMiddleware);
    SOCKET EVENTS
 ====================== */
 io.on('connection', (socket: Socket) => {
-  if (config.env === 'development') {
-    console.log('🟢 Socket connected:', socket.id);
+  const userId = (socket as any).user?.employeeId || (socket as any).user?.tenantId;
+  
+  if (userId) {
+    socket.join(userId);
+    if (config.env === 'development') {
+      console.log(`🟢 Socket ${socket.id} joined personal room: ${userId}`);
+    }
+  } else if (config.env === 'development') {
+    console.log('🟡 Socket connected without valid user:', socket.id);
   }
 
+  // Gracefully fallback or handle disjoints if client manually blasts join
   socket.on('join', () => {
-    if ((socket as any).user?.id) {
-      socket.join((socket as any).user.id);
-    }
+    if (userId) socket.join(userId);
   });
 
   socket.on('disconnect', () => {
     if (config.env === 'development') {
-      console.log('🔴 Socket disconnected:', socket.id);
+      console.log(`🔴 Socket disconnected: ${socket.id} (User: ${userId || 'Unknown'})`);
     }
   });
 });

@@ -70,6 +70,21 @@ export const updateProjectStatus = asyncHandler(async (req, res, next) => {
         }
     });
 
+    // Notify the Tenant/Admin directly about the status change
+    const notif = await prisma.notification.create({
+        data: {
+            tenantId: tenantId,
+            type: "PROJECT",
+            title: "Project Status Updated",
+            message: `Project '${projectInfo.name}' was marked as ${status}.`
+        }
+    });
+
+    if ((req as any).io) {
+        // Emit into the tenant's socket room directly
+        (req as any).io.to(tenantId).emit("notification", notif);
+    }
+
     res.status(200).json({ success: true, message: "Project status updated", project: updatedProject });
 });
 

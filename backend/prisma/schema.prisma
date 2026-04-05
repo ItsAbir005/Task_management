@@ -40,6 +40,7 @@ model Tenant {
   tasks                Task[]
   inviteTokens         InviteToken[]
   automationRules      AutomationRule[]
+  notifications        Notification[]
 }
 
 
@@ -235,14 +236,16 @@ model Task {
 // ========================
 model Notification {
   id        String   @id @default(cuid())
-  userId    String
+  userId    String?
+  tenantId  String?
   title     String?
   message   String
   type      NotificationType @default(GENERAL)
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  user      Employee @relation(fields: [userId], references: [id])
+  user      Employee? @relation(fields: [userId], references: [id])
+  tenant    Tenant?   @relation(fields: [tenantId], references: [id])
 }
 
 

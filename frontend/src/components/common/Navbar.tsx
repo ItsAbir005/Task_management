@@ -16,7 +16,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { GlobleContext } from "../../context/GlobleContext";
 
 const Navbar = () => {
-  const { user, logout } = useContext(GlobleContext);
+  const context = useContext(GlobleContext);
+  const { user, logout, notifications, unreadCount, markAsRead, markAllAsRead } = (context || {}) as any;
   const [showProfile, setShowProfile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -27,12 +28,6 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const notifications = [
-    { id: 1, title: "New Task Assigned", time: "2m ago", type: "TASK" },
-    { id: 2, title: "Leave Approved", time: "1h ago", type: "LEAVE" },
-    { id: 3, title: "System Update", time: "5h ago", type: "SYSTEM" },
-  ];
 
   return (
     <nav className={`sticky top-0 z-40 transition-all duration-300 ${
@@ -83,7 +78,11 @@ const Navbar = () => {
               className="w-11 h-11 bg-white border border-slate-200 rounded-2xl flex items-center justify-center relative hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm shadow-slate-100/50"
             >
               <Bell className="w-5 h-5 text-slate-600" />
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white" />
+              {unreadCount > 0 && (
+                <span className="absolute top-2.5 right-2.5 min-w-[14px] h-[14px] flex items-center justify-center bg-rose-500 rounded-full border-2 border-white text-[8px] font-bold text-white shadow-sm">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </motion.button>
             
             <AnimatePresence>
@@ -96,17 +95,19 @@ const Navbar = () => {
                 >
                   <div className="px-4 py-3 border-b border-slate-50 flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Notifications</span>
-                    <button className="text-[9px] font-bold text-emerald-600 hover:text-emerald-700">Clear All</button>
+                    <button onClick={markAllAsRead} className="text-[9px] font-bold text-emerald-600 hover:text-emerald-700">Clear All</button>
                   </div>
-                  <div className="py-2">
-                    {notifications.map(n => (
-                      <button key={n.id} className="w-full text-left p-3 hover:bg-slate-50 rounded-2xl transition-colors flex gap-3 group">
-                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-emerald-50 transition-colors">
-                           <Zap className="w-4 h-4 text-slate-400 group-hover:text-emerald-600" />
+                  <div className="py-2 max-h-80 overflow-y-auto">
+                    {notifications?.length === 0 ? (
+                      <div className="p-4 text-center text-xs font-bold text-slate-400">No Notifications</div>
+                    ) : notifications?.map((n: any) => (
+                      <button key={n.id} onClick={() => markAsRead(n.id)} className={`w-full text-left p-3 hover:bg-slate-50 rounded-2xl transition-colors flex gap-3 group ${!n.read ? 'bg-emerald-50/50' : ''}`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors shrink-0 ${!n.read ? 'bg-emerald-100 group-hover:bg-emerald-200' : 'bg-slate-100 group-hover:bg-slate-200'}`}>
+                           <Zap className={`w-4 h-4 ${!n.read ? 'text-emerald-600' : 'text-slate-400 group-hover:text-emerald-600'}`} />
                         </div>
                         <div>
                           <p className="text-xs font-bold text-slate-700">{n.title}</p>
-                          <p className="text-[10px] text-slate-400 mt-0.5">{n.time}</p>
+                          <p className={`text-[10px] mt-0.5 line-clamp-2 ${!n.read ? 'text-emerald-600 font-semibold' : 'text-slate-400'}`}>{n.message}</p>
                         </div>
                       </button>
                     ))}
