@@ -39,6 +39,7 @@ model Tenant {
   leaves               Leave[]
   tasks                Task[]
   inviteTokens         InviteToken[]
+  automationRules      AutomationRule[]
 }
 
 
@@ -149,6 +150,7 @@ model Project {
 
   // Manager relation → MULTIPLE PROJECT SUPPORT
   manager     Employee @relation("ProjectManagerEmployee", fields: [managerId], references: [id])
+  rooms       Room[]
 }
 
 
@@ -213,6 +215,7 @@ model Task {
   description   String?
   priority      TaskPriority @default(MEDIUM)
   status        TaskStatus   @default(TODO)
+  dueDate       DateTime?
 
   assigneeId    String
   creatorId     String
@@ -243,6 +246,36 @@ model Notification {
 }
 
 
+
+// ========================
+//  WORKFLOW ENGINE
+// ========================
+model AutomationRule {
+  id          String   @id @default(cuid())
+  tenantId    String
+  trigger     String   // "TASK_OVERDUE", "LEAVE_LONG_DURATION", "PROJECT_DELAYED"
+  condition   Json?    // e.g., { "days": 3 }
+  action      String   // "NOTIFY_MANAGER", "ESCALATE_HR", "CREATE_MEETING"
+  isActive    Boolean  @default(true)
+
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+}
+
+model EventLog {
+  id        String   @id @default(cuid())
+  type      String
+  payload   Json
+  createdAt DateTime @default(now())
+}
+
+model Room {
+  id          String   @id @default(cuid())
+  projectId   String
+  name        String
+  createdAt   DateTime @default(now())
+
+  project     Project  @relation(fields: [projectId], references: [id])
+}
 
 // ========================
 //  ENUMS
@@ -316,6 +349,9 @@ enum NotificationType {
   LEAVE
   SALARY
   SYSTEM
+  TASK_OVERDUE
+  LEAVE_ESCALATION
+  MEETING_CREATED
 }
 
 enum SubscriptionStatus {

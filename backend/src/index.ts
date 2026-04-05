@@ -12,6 +12,8 @@ import { Server } from 'socket.io';
 import router from './routes/AuthRoute.js';
 import router1 from './routes/AdminRoute.js';
 import stripeRouter from './routes/StripeRoute.js';
+import { startCronJobs } from './workflows/cron.js';
+import { initWorkflowEngine } from './workflows/engine.js';
 import { SocketAuth } from './middlewares/SocketAuth.js';
 import errorMiddleware from './middlewares/errorMiddleware.js';
 import config from './config/config.js';
@@ -74,6 +76,12 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+
+// Initialize the Workflow Engine with the Socket.io Server instance
+initWorkflowEngine(io);
+
+// Start Background Cron Jobs
+startCronJobs();
 
 // Attach io to ALL requests — must be before route registrations
 app.use((req: Request, res: Response, next: NextFunction) => {
