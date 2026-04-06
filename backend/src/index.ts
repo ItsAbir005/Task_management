@@ -119,9 +119,19 @@ io.on('connection', (socket: Socket) => {
     console.log('🟡 Socket connected without valid user:', socket.id);
   }
 
-  // Gracefully fallback or handle disjoints if client manually blasts join
-  socket.on('join', () => {
-    if (userId) socket.join(userId);
+  // Room management for collaborative discussions (e.g., specific tasks)
+  socket.on('join-room', (roomName: string) => {
+    socket.join(roomName);
+    if (config.env === 'development') {
+      console.log(`🔷 Socket ${socket.id} joined room: ${roomName}`);
+    }
+  });
+
+  socket.on('leave-room', (roomName: string) => {
+    socket.leave(roomName);
+    if (config.env === 'development') {
+      console.log(`🔶 Socket ${socket.id} left room: ${roomName}`);
+    }
   });
 
   socket.on('disconnect', () => {

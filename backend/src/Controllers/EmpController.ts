@@ -131,7 +131,7 @@ export const getEmpTasks = asyncHandler(async (req, res, next) => {
         return res.status(400).json({ message: "tenantId and employeeId are required" });
     }
 
-    const tasks = await prisma.task.findMany({
+    const tasks = await (prisma as any).task.findMany({
         where: {
             tenantId,
             assigneeId: employeeId
@@ -145,12 +145,22 @@ export const getEmpTasks = asyncHandler(async (req, res, next) => {
                     email: true,
                     role: true
                 }
+            },
+            project: {
+                select: {
+                    id: true,
+                    name: true,
+                    client: true
+                }
+            },
+            _count: {
+                select: { comments: true }
             }
         },
         orderBy: {
             createdAt: 'desc'
         }
-    });
+    } as any);
 
     res.status(200).json({ success: true, tasks });
 });
@@ -246,14 +256,16 @@ export const getEmpDashboardStats = asyncHandler(async (req, res, next) => {
         where: { tenantId, employeeId, status: "APPROVED" }
     });
 
-    const recentTasks = await prisma.task.findMany({
+    const recentTasks = await (prisma as any).task.findMany({
         where: { tenantId, assigneeId: employeeId },
         orderBy: { createdAt: 'desc' },
         take: 5,
         include: {
-            creator: { select: { firstName: true, lastName: true } }
+            creator: { select: { firstName: true, lastName: true, role: true } },
+            project: { select: { id: true, name: true } },
+            _count: { select: { comments: true } }
         }
-    });
+    } as any);
 
     res.status(200).json({
         stats: {
@@ -265,11 +277,17 @@ export const getEmpDashboardStats = asyncHandler(async (req, res, next) => {
             pendingLeaves: pendingLeavesCount,
             approvedLeaves: approvedLeavesCount
         },
-        recentActivity: recentTasks.map(task => ({
+        recentActivity: (recentTasks as any[]).map((task: any) => ({
             id: task.id,
+            title: task.title,
             action: `Assigned task: ${task.title}`,
             date: task.createdAt,
-            user: `${task.creator.firstName} ${task.creator.lastName || ''}`
+            status: task.status,
+            priority: task.priority,
+            project: task.project ? { id: task.project.id, name: task.project.name } : null,
+            user: `${task.creator.firstName} ${task.creator.lastName || ''}`.trim(),
+            creatorRole: task.creator.role,
+            commentCount: task._count.comments
         }))
     });
 });

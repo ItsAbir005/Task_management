@@ -284,7 +284,7 @@ export const getManagerTasks = asyncHandler(async (req, res, next) => {
         return res.status(400).json({ message: "tenantId and employeeId are required" });
     }
 
-    const tasks = await prisma.task.findMany({
+    const tasks = await (prisma as any).task.findMany({
         where: {
             tenantId,
             creatorId: employeeId
@@ -298,34 +298,96 @@ export const getManagerTasks = asyncHandler(async (req, res, next) => {
                     email: true,
                     role: true
                 }
+            },
+            project: {
+                select: {
+                    id: true,
+                    name: true,
+                    client: true
+                }
+            },
+            _count: {
+                select: { comments: true }
             }
         },
         orderBy: {
             createdAt: 'desc'
         }
-    });
+    } as any);
 
     res.status(200).json({ success: true, tasks });
+});
+
+//-----------------------------------------------------Get Project Members (for task assignee dropdown)-----------------------------------------------------//
+
+export const getProjectMembers = asyncHandler(async (req, res, next) => {
+    const { tenantId, employeeId } = req;
+    const projectId = req.params.projectId as string;
+
+    if (!tenantId || !employeeId || !projectId) {
+        return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const project = await prisma.project.findFirst({
+        where: { id: projectId, tenantId, managerId: employeeId },
+        select: {
+            id: true,
+            name: true,
+            members: {
+                select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                    role: true,
+                    profilePic: true
+                }
+            }
+        }
+    });
+
+    if (!project) {
+        return res.status(403).json({ message: "Project not found or unauthorized" });
+    }
+
+    res.status(200).json({ success: true, members: project.members, projectName: project.name });
 });
 
 //-----------------------------------------------------Create Task-----------------------------------------------------//
 
 export const createTask = asyncHandler(async (req, res, next) => {
     const { tenantId, employeeId } = req;
-    const { title, description, priority, assigneeId } = req.body;
+    const { title, description, priority, assigneeId, projectId, dueDate } = req.body;
 
     if (!title || !assigneeId) {
         return res.status(400).json({ message: "Title and Assignee are required" });
     }
 
-    const task = await prisma.task.create({
+    // If projectId provided, verify the assignee is a member of that project
+    if (projectId) {
+        const project = await prisma.project.findFirst({
+            where: {
+                id: projectId,
+                tenantId,
+                managerId: employeeId,
+                members: { some: { id: assigneeId } }
+            }
+        });
+        if (!project) {
+            return res.status(403).json({ message: "Assignee is not a member of the selected project" });
+        }
+    }
+
+    const task = await (prisma as any).task.create({
         data: {
             title,
             description,
             priority,
             assigneeId,
             creatorId: employeeId,
-            tenantId
+            tenantId,
+            projectId: projectId || null,
+            dueDate: dueDate ? new Date(dueDate) : null
         },
         include: {
             assignee: {
@@ -335,22 +397,25 @@ export const createTask = asyncHandler(async (req, res, next) => {
                     lastName: true,
                     email: true
                 }
+            },
+            project: {
+                select: { id: true, name: true, client: true }
             }
         }
-    });
+    } as any);
 
     // Notify the assignee
-    await prisma.notification.create({
+    const notification = await prisma.notification.create({
         data: {
             userId: assigneeId,
             title: "New Task Assigned",
-            message: `You have been assigned a new task: ${title}`,
+            message: `You have been assigned a new task: "${title}"${projectId ? ` on project` : ''}`,
             type: "TASK"
         }
     });
 
     if (req.io) {
-        req.io.to(assigneeId).emit("task-assigned", { task });
+        req.io.to(assigneeId).emit("task-assigned", { task, notification });
     }
 
     res.status(201).json({ success: true, message: "Task created successfully", task });

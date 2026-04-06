@@ -3,7 +3,8 @@ import { AuthenticateMiddleware, authorize } from '../middlewares/AuthMiddleware
 import { addDepartment, addProject, deleteProject, getDashboardStats, getDepartment, getEmployee, getProject, updateEmployee } from '../Controllers/AdminComtroller.js';
 import { applyLeave, getEmpProjects, getLeaves, getEmpTasks, updateEmpTaskStatus, getEmpDashboardStats } from '../Controllers/EmpController.js';
 import { getHRLeaves, updateLeaveStatus, getHrDashboardStats } from '../Controllers/HRControllers.js';
-import { getManagerProjects, updateProjectStatus, getManagerDashboardStats, getManagerLeaves, updateManagerLeaveStatus, getManagerTasks, createTask, updateTaskStatus, deleteTask } from '../Controllers/ManagerController.js';
+import { getManagerProjects, updateProjectStatus, getManagerDashboardStats, getManagerLeaves, updateManagerLeaveStatus, getManagerTasks, createTask, updateTaskStatus, deleteTask, getProjectMembers } from '../Controllers/ManagerController.js';
+import { getTaskComments, addComment, deleteComment } from '../Controllers/CommentController.js';
 
 
 const router = express.Router();
@@ -36,9 +37,15 @@ router.get('/manager-tasks', AuthenticateMiddleware, authorize('MANAGER', 'ADMIN
 router.post('/manager-task', AuthenticateMiddleware, authorize('MANAGER', 'ADMIN'), createTask);
 router.put('/manager-task/:taskId', AuthenticateMiddleware, authorize('MANAGER', 'ADMIN'), updateTaskStatus);
 router.delete('/manager-task/:taskId', AuthenticateMiddleware, authorize('MANAGER', 'ADMIN'), deleteTask);
+router.get('/manager-project/:projectId/members', AuthenticateMiddleware, authorize('MANAGER', 'ADMIN'), getProjectMembers);
 
 router.get('/emp-tasks', AuthenticateMiddleware, authorize('EMPLOYEE', 'ADMIN', 'MANAGER'), getEmpTasks);
 router.patch('/emp-task-status/:taskId', AuthenticateMiddleware, authorize('EMPLOYEE', 'ADMIN', 'MANAGER'), updateEmpTaskStatus);
 router.get('/emp-dashboard-stats', AuthenticateMiddleware, authorize('EMPLOYEE', 'ADMIN', 'MANAGER'), getEmpDashboardStats);
+
+// ====================== COMMENTS ======================//
+router.get('/task/:taskId/comments', AuthenticateMiddleware, getTaskComments);
+router.post('/task/:taskId/comment', AuthenticateMiddleware, addComment);
+router.delete('/task-comment/:commentId', AuthenticateMiddleware, deleteComment);
 
 export default router;

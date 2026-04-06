@@ -122,6 +122,9 @@ model Employee {
 
   // Notifications
   notifications      Notification[]
+
+  // Comments
+  comments           TaskComment[] @relation("CommentAuthor")
 }
 
 
@@ -152,6 +155,7 @@ model Project {
   // Manager relation → MULTIPLE PROJECT SUPPORT
   manager     Employee @relation("ProjectManagerEmployee", fields: [managerId], references: [id])
   rooms       Room[]
+  tasks       Task[]
 }
 
 
@@ -220,6 +224,7 @@ model Task {
 
   assigneeId    String
   creatorId     String
+  projectId     String?
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -227,6 +232,24 @@ model Task {
   tenant        Tenant    @relation(fields: [tenantId], references: [id])
   assignee      Employee  @relation("TaskAssignee", fields: [assigneeId], references: [id])
   creator       Employee  @relation("TaskCreator", fields: [creatorId], references: [id])
+  project       Project?  @relation(fields: [projectId], references: [id])
+  comments      TaskComment[]
+}
+
+// ========================
+//  TASK COMMENT
+// ========================
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  authorId  String
+  content   String
+  mentions  String[] // array of employeeIds mentioned
+
+  createdAt DateTime @default(now())
+
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author    Employee @relation("CommentAuthor", fields: [authorId], references: [id])
 }
 
 
