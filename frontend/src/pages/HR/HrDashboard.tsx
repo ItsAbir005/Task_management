@@ -41,7 +41,7 @@ const HrDashboard = () => {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full"
+          className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full"
         />
       </div>
     );
@@ -65,14 +65,14 @@ const HrDashboard = () => {
   };
 
   const stats = [
-    { title: "Total Talent", value: hrStats?.stats.totalEmployees, icon: Users, color: "indigo", delay: 0 },
+    { title: "Total Talent", value: hrStats?.stats.totalEmployees, icon: Users, color: "blue", delay: 0 },
     { title: "Departments", value: hrStats?.stats.totalDepartments, icon: Building2, color: "blue", delay: 0.1 },
     { title: "Pending Leaves", value: hrStats?.stats.pendingLeaves, icon: FileText, color: "orange", delay: 0.2 },
     { title: "Approved Leaves", value: hrStats?.stats.approvedLeaves, icon: CheckCircle, color: "green", delay: 0.3 },
   ];
 
   return (
-    <div className="p-4 md:p-8 space-y-8 bg-indigo-50/30 min-h-screen">
+    <div className="p-4 md:p-8 space-y-8 bg-gray-50/50 min-h-screen">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -82,11 +82,11 @@ const HrDashboard = () => {
         
         <div className="flex items-center gap-3">
             <div className="relative group hidden sm:block">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
                 <input 
                     type="text" 
                     placeholder="Search employees..." 
-                    className="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all w-64 shadow-sm"
+                    className="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all w-64 shadow-sm"
                 />
             </div>
             <button className="p-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors relative shadow-sm">
@@ -97,7 +97,7 @@ const HrDashboard = () => {
             </button>
             <div 
                 onClick={handleLeaveReport}
-                className="bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 flex items-center gap-2 hover:bg-indigo-700 transition-all cursor-pointer">
+                className="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-600/20 flex items-center gap-2 hover:bg-blue-700 transition-all cursor-pointer">
                 <TrendingUp className="w-4 h-4" />
                 Leave Report
             </div>

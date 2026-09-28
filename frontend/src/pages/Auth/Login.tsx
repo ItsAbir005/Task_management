@@ -72,10 +72,10 @@ const Login = () => {
   };
 
   const roles = [
-    { value: "ADMIN", label: "Admin", emoji: "👑" },
-    { value: "HR", label: "HR Manager", emoji: "🏢" },
-    { value: "MANAGER", label: "Manager", emoji: "📊" },
-    { value: "EMPLOYEE", label: "Employee", emoji: "👤" },
+    { value: "ADMIN", label: "Admin" },
+    { value: "HR", label: "HR Manager" },
+    { value: "MANAGER", label: "Manager" },
+    { value: "EMPLOYEE", label: "Employee" },
   ];
 
   return (
@@ -114,7 +114,7 @@ const Login = () => {
           </div>
 
           <h1 style={{ fontSize: "34px", fontWeight: 800, lineHeight: 1.2, marginBottom: "16px" }}>
-            Welcome Back 👋
+            Welcome Back
           </h1>
           <p style={{ opacity: 0.85, lineHeight: 1.8, marginBottom: "36px", fontSize: "15px" }}>
             Your all-in-one platform for HR, projects, leaves, and team management.
@@ -123,11 +123,11 @@ const Login = () => {
           {/* Role cards */}
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {[
-              { icon: "👑", role: "Admin", desc: "Manage everything — invite HR & Managers" },
-              { icon: "🏢", role: "HR", desc: "Handle leaves, employees & compliance" },
-              { icon: "📊", role: "Manager", desc: "Projects, tasks & team performance" },
-              { icon: "👤", role: "Employee", desc: "Your dashboard, tasks & leave requests" },
-            ].map(({ icon, role, desc }) => (
+              { role: "Admin", desc: "Manage everything — invite HR & Managers" },
+              { role: "HR", desc: "Handle leaves, employees & compliance" },
+              { role: "Manager", desc: "Projects, tasks & team performance" },
+              { role: "Employee", desc: "Your dashboard, tasks & leave requests" },
+            ].map(({ role, desc }) => (
               <div key={role} style={{
                 background: "rgba(255,255,255,0.12)",
                 borderRadius: "12px",
@@ -136,7 +136,7 @@ const Login = () => {
                 alignItems: "center",
                 gap: "12px",
               }}>
-                <span style={{ fontSize: "20px" }}>{icon}</span>
+                <span style={{ width: "28px", height: "28px", borderRadius: "8px", background: "rgba(255,255,255,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 800 }}>{role.slice(0, 1)}</span>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: "13px" }}>{role}</div>
                   <div style={{ opacity: 0.75, fontSize: "12px" }}>{desc}</div>
@@ -246,7 +246,7 @@ const Login = () => {
                 >
                   {roles.map(r => (
                     <option key={r.value} value={r.value} style={{ background: "#1a1a2e" }}>
-                      {r.emoji} {r.label}
+                      {r.label}
                     </option>
                   ))}
                 </select>

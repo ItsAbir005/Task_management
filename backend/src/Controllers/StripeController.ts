@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { asyncHandler } from '../utils/AsyncHandler.js';
 import prisma from '../utils/client.js';
 import {
-  stripe,
+  getStripe,
   createStripeCustomer,
   createCheckoutSession,
   constructWebhookEvent,
@@ -91,7 +91,7 @@ export const verifySession = asyncHandler(async (req: Request, res: Response) =>
   }
 
   // Retrieve session directly from Stripe API
-  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  const session = await getStripe().checkout.sessions.retrieve(sessionId);
 
   if (session.payment_status !== 'paid' || session.status !== 'complete') {
     return res.status(402).json({ message: 'Payment not completed yet' });

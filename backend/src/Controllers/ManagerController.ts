@@ -110,7 +110,12 @@ export const getManagerDashboardStats = asyncHandler(async (req, res, next) => {
     // 3. Unique Team Members
     const projectsWithMembers = await prisma.project.findMany({
         where: { tenantId, managerId: employeeId },
-        select: { members: { select: { id: true } } }
+        select: {
+            members: {
+                where: { status: { not: "TERMINATED" } },
+                select: { id: true }
+            }
+        }
     });
     const uniqueMemberIds = new Set();
     projectsWithMembers.forEach(proj => {
@@ -120,7 +125,12 @@ export const getManagerDashboardStats = asyncHandler(async (req, res, next) => {
 
     // 4. Pending Leave Requests (where managerStatus is PENDING)
     const pendingLeaves = await prisma.leave.count({
-        where: { tenantId, managerId: employeeId, managerStatus: 'PENDING' }
+        where: {
+            tenantId,
+            managerId: employeeId,
+            managerStatus: 'PENDING',
+            employee: { status: { not: "TERMINATED" } }
+        }
     });
 
     // 5. Chart Data (Projects grouped by Status)
@@ -147,7 +157,11 @@ export const getManagerDashboardStats = asyncHandler(async (req, res, next) => {
 
     // 6. Recent Leave Requests Feed
     const recentLeaves = await prisma.leave.findMany({
-        where: { tenantId, managerId: employeeId },
+        where: {
+            tenantId,
+            managerId: employeeId,
+            employee: { status: { not: "TERMINATED" } }
+        },
         take: 5,
         orderBy: { appliedAt: 'desc' },
         include: {

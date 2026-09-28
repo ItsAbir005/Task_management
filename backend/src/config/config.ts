@@ -15,12 +15,12 @@ const config = {
     },
     email: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        pass: process.env.EMAIL_PASSWORD?.replace(/\s/g, ''),
     },
     frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
     stripe: {
-        secretKey: process.env.STRIPE_SECRET_KEY || '',
-        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
+        secretKey: process.env.STRIPE_SECRET_KEY || process.env.STRIPES_SECRET_KEY || '',
+        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || process.env.STRIPES_PUBLISHABLE_KEY || '',
         webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
     },
 };

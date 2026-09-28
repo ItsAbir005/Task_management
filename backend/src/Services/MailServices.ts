@@ -18,6 +18,10 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendEmail = async (to: string, subject: string, text: string): Promise<void> => {
+  if (!config.email.user || !config.email.pass) {
+    throw new Error("Email is not configured. Set EMAIL_USER and EMAIL_PASSWORD in backend/.env.");
+  }
+
   const mailOptions = {
     from: `"HRM SaaS" <${config.email.user}>`,
     to,

@@ -4,12 +4,12 @@ import { Link } from "react-router-dom";
 
 const MangRecentLeaves = ({ activity = [] }) => {
   return (
-    <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full">
-      <div className="p-6 border-b border-slate-50 flex items-center justify-between">
-        <h3 className="text-xl font-extrabold text-slate-800 tracking-tight">Recent Leave Requests</h3>
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full">
+      <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+        <h3 className="text-lg font-bold text-gray-800">Recent Leave Requests</h3>
         <Link 
           to="/manager/leavemanagement" 
-          className="text-sm font-bold text-violet-600 hover:text-violet-700 flex items-center gap-1 group"
+          className="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 group"
         >
           View All <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </Link>
@@ -21,11 +21,11 @@ const MangRecentLeaves = ({ activity = [] }) => {
             {activity.map((leave) => (
               <div
                 key={leave.id}
-                className="group flex flex-col p-4 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100"
+                className="group flex flex-col p-4 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-violet-500 to-indigo-500 text-white flex items-center justify-center font-bold shadow-sm">
+                    <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-sm">
                       {leave.firstName?.[0]}{leave.lastName?.[0] || ""}
                     </div>
                     <div>

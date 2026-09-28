@@ -3,7 +3,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 
 const COLORS = {
   COMPLETED: "#10b981", // Emerald
-  ONGOING: "#6366f1", // Indigo
+  ONGOING: "#2563eb", // Blue
   PENDING: "#f59e0b", // Amber
   CANCELLED: "#f43f5e", // Rose
 };
@@ -13,8 +13,8 @@ const MangProjectChart = ({ chartData = [] }) => {
   const RADIAN = Math.PI / 180;
   
   return (
-    <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-6 flex flex-col items-center justify-center relative min-h-[350px]">
-      <h3 className="text-xl font-extrabold text-slate-800 tracking-tight self-start mb-4">Project Allocation</h3>
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col items-center justify-center relative min-h-[350px]">
+      <h3 className="text-lg font-bold text-gray-800 self-start mb-4">Project Allocation</h3>
 
       {chartData.every((item) => item.value === 0) ? (
         <div className="text-slate-400 font-medium py-10 flex flex-col items-center justify-center">

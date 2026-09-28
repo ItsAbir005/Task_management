@@ -119,6 +119,10 @@ export const employeeLogin = asyncHandler(async (req: Request, res: Response) =>
     return res.status(401).json({ success: false, message: "Invalid credentials" });
   }
 
+  if (employee.status === "TERMINATED") {
+    return res.status(403).json({ success: false, message: "This account has been terminated." });
+  }
+
   if (!employee.password) {
     return res.status(401).json({ success: false, message: "Please set your password first using the invite link." });
   }
@@ -160,7 +164,9 @@ export const inviteHRManager = asyncHandler(async (req: Request, res: Response) 
   if (!tenant) return res.status(404).json({ message: "Tenant not found" });
 
   const existing = await prisma.employee.findFirst({ where: { email, tenantId } });
-  if (existing) return res.status(400).json({ message: "Employee with this email already exists" });
+  if (existing && existing.status !== "TERMINATED" && existing.password) {
+    return res.status(400).json({ message: "Employee with this email already exists" });
+  }
 
   const empData: any = {
     firstName,
@@ -177,7 +183,9 @@ export const inviteHRManager = asyncHandler(async (req: Request, res: Response) 
     if (dept) empData.departmentId = dept.id;
   }
 
-  const newEmployee = await prisma.employee.create({ data: empData });
+  const newEmployee = existing
+    ? await prisma.employee.update({ where: { id: existing.id }, data: { ...empData, status: "ACTIVE" } })
+    : await prisma.employee.create({ data: empData });
 
   const link = `${config.frontendUrl}/set-password?token=${newEmployee.setupToken}`;
   const roleLabel = role === 'HR' ? 'HR Manager' : 'Manager';
@@ -220,7 +228,9 @@ export const HRInviteEmployee = asyncHandler(async (req: Request, res: Response)
   if (!hrManager) return res.status(404).json({ message: "HR Manager not found" });
 
   const existing = await prisma.employee.findFirst({ where: { email, tenantId } });
-  if (existing) return res.status(400).json({ message: "Employee with this email already exists" });
+  if (existing && existing.status !== "TERMINATED" && existing.password) {
+    return res.status(400).json({ message: "Employee with this email already exists" });
+  }
 
   let deptRecord = null;
   if (departmentId) {
@@ -230,20 +240,22 @@ export const HRInviteEmployee = asyncHandler(async (req: Request, res: Response)
 
   const token = crypto.randomBytes(32).toString('hex');
 
-  const newEmployee = await prisma.employee.create({
-    data: {
-      firstName,
-      lastName,
-      email,
-      role: 'EMPLOYEE',
-      tenantId,
-      departmentId: deptRecord?.id,
-      salary: salary ? parseFloat(salary) : undefined,
-      setupToken: token,
-      setupTokenExpiry: new Date(Date.now() + 1000 * 60 * 60 * 48),
-    },
-    include: { department: true },
-  });
+  const employeeData = {
+    firstName,
+    lastName,
+    email,
+    role: 'EMPLOYEE' as const,
+    tenantId,
+    departmentId: deptRecord?.id,
+    salary: salary ? parseFloat(salary) : undefined,
+    setupToken: token,
+    setupTokenExpiry: new Date(Date.now() + 1000 * 60 * 60 * 48),
+    status: "ACTIVE" as const,
+  };
+
+  const newEmployee = existing
+    ? await prisma.employee.update({ where: { id: existing.id }, data: employeeData, include: { department: true } })
+    : await prisma.employee.create({ data: employeeData, include: { department: true } });
 
   const link = `${config.frontendUrl}/set-password?token=${token}`;
 
@@ -281,7 +293,9 @@ export const addEmployee = asyncHandler(async (req: Request, res: Response) => {
   if (!tenant) return res.status(404).json({ message: "Tenant not found" });
 
   const existingEmployee = await prisma.employee.findFirst({ where: { email, tenantId } });
-  if (existingEmployee) return res.status(400).json({ message: "Employee with this email already exists" });
+  if (existingEmployee && existingEmployee.status !== "TERMINATED" && existingEmployee.password) {
+    return res.status(400).json({ message: "Employee with this email already exists" });
+  }
 
   const departmentRecord = await prisma.department.findFirst({ where: { id: departmentId, tenantId } });
   if (!departmentRecord) return res.status(404).json({ message: "Department not found or does not belong to your company" });
@@ -289,17 +303,22 @@ export const addEmployee = asyncHandler(async (req: Request, res: Response) => {
   const numericSalary = parseFloat(salary);
   const token = crypto.randomBytes(32).toString("hex");
 
-  const newEmployee = await prisma.employee.create({
-    data: {
-      firstName, lastName, email, role,
-      salary: numericSalary,
-      departmentId: departmentRecord.id,
-      tenantId: tenant.id,
-      setupToken: token,
-      setupTokenExpiry: new Date(Date.now() + 1000 * 60 * 60 * 24),
-    },
-    include: { department: true },
-  });
+  const employeeData = {
+    firstName,
+    lastName,
+    email,
+    role,
+    salary: numericSalary,
+    departmentId: departmentRecord.id,
+    tenantId: tenant.id,
+    setupToken: token,
+    setupTokenExpiry: new Date(Date.now() + 1000 * 60 * 60 * 24),
+    status: "ACTIVE" as const,
+  };
+
+  const newEmployee = existingEmployee
+    ? await prisma.employee.update({ where: { id: existingEmployee.id }, data: employeeData, include: { department: true } })
+    : await prisma.employee.create({ data: employeeData, include: { department: true } });
 
   const link = `${config.frontendUrl}/set-password?token=${token}`;
 

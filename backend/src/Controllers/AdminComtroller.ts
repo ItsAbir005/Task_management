@@ -36,6 +36,9 @@ export const getDepartment = asyncHandler(async (req, res, next) => {
         },
         include: {
             employees: {
+            where: {
+              status: "ACTIVE",
+            },
                 select: {
                     id: true,
                     firstName : true,
@@ -64,6 +67,9 @@ export const getEmployee = asyncHandler(async (req, res, next) => {
     },
     include: {
       employees: {
+        where: {
+          status: "ACTIVE",
+        },
         include: {
           department: true, 
         },
@@ -182,13 +188,14 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
   const tenantId = req.tenantId;
 
   // Counts
-  const employeeCount = await prisma.employee.count({ where: { tenantId } });
+   const employeeCount = await prisma.employee.count({ where: { tenantId, status: { not: "TERMINATED" } } });
   const departmentCount = await prisma.department.count({ where: { tenantId } });
   const projectCount = await prisma.project.count({ where: { tenantId } });
   const pendingLeaveCount = await prisma.leave.count({ 
       where: { 
           tenantId,
-          status: 'PENDING'
+          status: 'PENDING',
+          employee: { status: { not: "TERMINATED" } }
       } 
   });
 
@@ -197,7 +204,9 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
       where: { tenantId },
       include: {
           _count: {
-              select: { employees: true }
+                select: {
+                  employees: { where: { status: { not: "TERMINATED" } } }
+                }
           }
       }
   });
@@ -209,7 +218,7 @@ export const getDashboardStats = asyncHandler(async (req, res, next) => {
 
   // Recent Employees (Activity)
   const recentEmployees = await prisma.employee.findMany({
-      where: { tenantId },
+      where: { tenantId, status: { not: "TERMINATED" } },
       take: 5,
       orderBy: { createdAt: 'desc' },
       select: {

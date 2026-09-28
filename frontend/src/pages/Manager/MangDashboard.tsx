@@ -36,9 +36,9 @@ const MangDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-indigo-600">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-blue-600">
         <Loader2 className="w-12 h-12 animate-spin mb-4" />
-        <p className="font-bold text-lg text-slate-700">Synthesizing Control Center...</p>
+        <p className="font-bold text-lg text-gray-700">Loading dashboard...</p>
       </div>
     );
   }
@@ -52,21 +52,19 @@ const MangDashboard = () => {
   };
 
   const statCards = [
-    { title: "Managed Projects", value: stats.totalProjects, icon: FolderTree, color: "indigo", delay: 0 },
+    { title: "Managed Projects", value: stats.totalProjects, icon: FolderTree, color: "blue", delay: 0 },
     { title: "Team Members", value: stats.teamMembersCount, icon: Users, color: "blue", delay: 0.1 },
-    { title: "Pending Leaves", value: stats.pendingLeaves, icon: Palmtree, color: "amber", delay: 0.2 },
-    { title: "Projects Completed", value: stats.completedProjects, icon: CheckCircle, color: "emerald", delay: 0.3 },
+    { title: "Pending Leaves", value: stats.pendingLeaves, icon: Palmtree, color: "orange", delay: 0.2 },
+    { title: "Projects Completed", value: stats.completedProjects, icon: CheckCircle, color: "green", delay: 0.3 },
   ];
 
   return (
-    <div className="p-4 md:p-8 space-y-8 bg-slate-50 min-h-screen">
+    <div className="p-4 md:p-8 space-y-8 bg-gray-50/50 min-h-screen">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white/60 p-6 rounded-3xl border border-white backdrop-blur-xl shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Manager Dashboard</h1>
-          </div>
-          <p className="text-slate-500 font-medium">
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Manager Dashboard</h1>
+          <p className="text-gray-500 mt-1 font-medium">
             Monitor your team performance, project throughput, and pending action items.
           </p>
         </div>

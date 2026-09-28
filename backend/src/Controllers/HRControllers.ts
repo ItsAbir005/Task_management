@@ -100,18 +100,20 @@ export const getHrDashboardStats = asyncHandler(async (req, res, next) => {
   const tenantId = req.tenantId;
 
   // Counts
-  const employeeCount = await prisma.employee.count({ where: { tenantId } });
+  const employeeCount = await prisma.employee.count({ where: { tenantId, status: { not: "TERMINATED" } } });
   const departmentCount = await prisma.department.count({ where: { tenantId } });
   const pendingLeaveCount = await prisma.leave.count({
     where: {
       tenantId,
-      status: 'PENDING'
+      status: 'PENDING',
+      employee: { status: { not: "TERMINATED" } }
     }
   });
   const approvedLeaveCount = await prisma.leave.count({
     where: {
       tenantId,
-      status: 'APPROVED'
+      status: 'APPROVED',
+      employee: { status: { not: "TERMINATED" } }
     }
   });
 
@@ -140,7 +142,7 @@ export const getHrDashboardStats = asyncHandler(async (req, res, next) => {
 
   // Recent Leave Requests
   const recentLeaves = await prisma.leave.findMany({
-    where: { tenantId },
+    where: { tenantId, employee: { status: { not: "TERMINATED" } } },
     take: 5,
     orderBy: { appliedAt: 'desc' },
     include: {

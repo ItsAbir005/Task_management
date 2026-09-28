@@ -1,11 +1,19 @@
 import Stripe from 'stripe';
 import config from '../config/config.js';
 
-export const stripe = new Stripe(config.stripe.secretKey);
+const stripe = config.stripe.secretKey ? new Stripe(config.stripe.secretKey) : null;
+
+export const getStripe = () => {
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Set STRIPE_SECRET_KEY in the backend environment.');
+  }
+
+  return stripe;
+};
 
 // ─── Create a Stripe customer ────────────────────────────────────────────────
 export const createStripeCustomer = async (name: string, email: string) => {
-  return await stripe.customers.create({ name, email });
+  return await getStripe().customers.create({ name, email });
 };
 
 // ─── Create recurring monthly checkout session ───────────────────────────────
@@ -14,7 +22,7 @@ export const createCheckoutSession = async (
   tenantId: string,
   tenantName: string
 ) => {
-  return await stripe.checkout.sessions.create({
+  return await getStripe().checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
     payment_method_types: ['card'],
@@ -45,5 +53,5 @@ export const createCheckoutSession = async (
 
 // ─── Verify & parse webhook event (needs raw body) ───────────────────────────
 export const constructWebhookEvent = (payload: Buffer, sig: string) => {
-  return stripe.webhooks.constructEvent(payload, sig, config.stripe.webhookSecret);
+  return getStripe().webhooks.constructEvent(payload, sig, config.stripe.webhookSecret);
 };

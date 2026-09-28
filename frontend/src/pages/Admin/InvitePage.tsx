@@ -44,9 +44,9 @@ const InvitePage = () => {
   };
 
   const inviteStats = [
-    { icon: "🏢", label: "Invite HR Manager", desc: "HR will handle leaves, employees & compliance", value: "HR" },
-    { icon: "📊", label: "Invite Manager", desc: "Managers will invite employees & manage projects", value: "MANAGER" },
-    { icon: "👥", label: "Invite Employee", desc: "Standard employee with no admin rights", value: "EMPLOYEE" },
+    { label: "Invite HR Manager", desc: "HR will handle leaves, employees & compliance", value: "HR" },
+    { label: "Invite Manager", desc: "Managers will invite employees & manage projects", value: "MANAGER" },
+    { label: "Invite Employee", desc: "Standard employee with no admin rights", value: "EMPLOYEE" },
   ];
 
   return (
@@ -81,7 +81,7 @@ const InvitePage = () => {
               transition: "all 0.2s",
             }}
           >
-            <div style={{ fontSize: "28px", marginBottom: "8px" }}>{stat.icon}</div>
+            <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: form.role === stat.value ? "#2563eb" : "#dbeafe", color: form.role === stat.value ? "#fff" : "#1d4ed8", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, marginBottom: "8px" }}>{stat.value.slice(0, 1)}</div>
             <div style={{ fontWeight: 700, color: "#1e1b4b", marginBottom: "4px" }}>{stat.label}</div>
             <div style={{ fontSize: "13px", color: "#6b7280" }}>{stat.desc}</div>
           </div>

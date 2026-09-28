@@ -68,7 +68,7 @@ const EmpDashboard = () => {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full"
+          className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full"
         />
       </div>
     );
@@ -77,14 +77,14 @@ const EmpDashboard = () => {
   const stats = [
     { title: "Total Projects", value: empStats?.stats?.totalProjects || 0, icon: Briefcase, color: "blue", delay: 0 },
     { title: "Pending Tasks", value: empStats?.stats?.pendingTasks || 0, icon: Clock, color: "orange", delay: 0.1 },
-    { title: "In Progress", value: empStats?.stats?.inProgressTasks || 0, icon: Activity, color: "indigo", delay: 0.2 },
+    { title: "In Progress", value: empStats?.stats?.inProgressTasks || 0, icon: Activity, color: "blue", delay: 0.2 },
     { title: "Completed", value: empStats?.stats?.completedTasks || 0, icon: CheckCircle, color: "green", delay: 0.3 },
   ];
 
   const recentActivity: any[] = empStats?.recentActivity || [];
 
   return (
-    <div className="p-4 md:p-8 space-y-8 bg-indigo-50/30 min-h-screen">
+    <div className="p-4 md:p-8 space-y-8 bg-gray-50/50 min-h-screen">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -108,7 +108,7 @@ const EmpDashboard = () => {
         {/* Recent Task Assignments — enriched */}
         <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
           <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <Activity className="w-5 h-5 text-indigo-600" />
+            <Activity className="w-5 h-5 text-blue-600" />
             Recent Assignments
           </h3>
 
@@ -151,7 +151,7 @@ const EmpDashboard = () => {
                       {/* Project & creator row */}
                       <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                         {activity.project && (
-                          <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                            <span className="flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">
                             <Briefcase className="w-2.5 h-2.5" />
                             {activity.project.name}
                           </span>
@@ -214,8 +214,8 @@ const EmpDashboard = () => {
           </div>
 
           {/* Task Progress card */}
-          <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-6 rounded-2xl text-white shadow-lg shadow-indigo-200">
-            <h3 className="text-sm font-black uppercase tracking-widest mb-4 text-indigo-200">Task Progress</h3>
+          <div className="bg-blue-600 p-6 rounded-2xl text-white shadow-lg shadow-blue-200">
+            <h3 className="text-sm font-black uppercase tracking-widest mb-4 text-blue-100">Task Progress</h3>
             <div className="space-y-3">
               {[
                 { label: "Completed", value: empStats?.stats?.completedTasks || 0, total: empStats?.stats?.totalTasks || 1, color: "bg-emerald-400" },
