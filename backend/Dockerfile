@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/
 
 WORKDIR /app
 
+ENV DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+
 # Install dependencies
 COPY package*.json ./
 RUN npm config set fetch-retries 5 && \
@@ -34,6 +36,7 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/start.sh ./start.sh
 
 # Expose the port the app runs on
 EXPOSE 3000
