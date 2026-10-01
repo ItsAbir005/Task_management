@@ -53,17 +53,29 @@ export const applyLeave = asyncHandler(async (req, res, next) => {
         return res.status(400).json({ message: "tenantId and employeeId are required" });
     }
 
-    // Find the employee's manager via their first project assignment
-    // Employee model has NO managerId – manager relationship flows through Projects
-    const project = await prisma.project.findFirst({
-        where: {
-            tenantId,
-            members: { some: { id: employeeId } }
-        },
-        select: { managerId: true }
+    const employee = await prisma.employee.findUnique({
+        where: { id: employeeId },
+        select: { departmentId: true },
     });
 
-    const resolvedManagerId = project?.managerId || null;
+    const departmentManager = employee?.departmentId
+        ? await prisma.employee.findFirst({
+            where: {
+                tenantId,
+                departmentId: employee.departmentId,
+                role: "MANAGER",
+                status: "ACTIVE",
+            },
+            select: { id: true },
+        })
+        : null;
+
+    const project = departmentManager ? null : await prisma.project.findFirst({
+        where: { tenantId, members: { some: { id: employeeId } } },
+        select: { managerId: true },
+    });
+
+    const resolvedManagerId = departmentManager?.id || project?.managerId || null;
 
     const newLeave = await prisma.leave.create({
         data: {
@@ -290,4 +302,4 @@ export const getEmpDashboardStats = asyncHandler(async (req, res, next) => {
             commentCount: task._count.comments
         }))
     });
-});
+});

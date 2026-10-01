@@ -1,6 +1,14 @@
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import prisma from "../utils/client.js";
 
+const getManagerDepartmentId = async (tenantId: string, employeeId: string) => {
+    const manager = await prisma.employee.findFirst({
+        where: { id: employeeId, tenantId, role: "MANAGER" },
+        select: { departmentId: true },
+    });
+    return manager?.departmentId || null;
+};
+
 //-----------------------------------------------------Get Manager Projects-----------------------------------------------------//
 
 export const getManagerProjects = asyncHandler(async (req, res, next) => {
@@ -43,6 +51,8 @@ export const addProjectMember = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: "Project and employee are required" });
     }
 
+    const managerDepartmentId = await getManagerDepartmentId(tenantId, managerId);
+
     const project = await prisma.project.findFirst({
         where: { id: projectId, tenantId, managerId },
     });
@@ -51,7 +61,13 @@ export const addProjectMember = asyncHandler(async (req, res) => {
     }
 
     const employee = await prisma.employee.findFirst({
-        where: { id: employeeId, tenantId, role: "EMPLOYEE", status: "ACTIVE" },
+        where: {
+            id: employeeId,
+            tenantId,
+            role: "EMPLOYEE",
+            status: "ACTIVE",
+            ...(managerDepartmentId ? { departmentId: managerDepartmentId } : {}),
+        },
     });
     if (!employee) {
         return res.status(404).json({ message: "Active employee not found" });
@@ -133,6 +149,8 @@ export const getManagerDashboardStats = asyncHandler(async (req, res, next) => {
         return res.status(400).json({ message: "tenantId and employeeId are required" });
     }
 
+    const managerDepartmentId = await getManagerDepartmentId(tenantId, employeeId);
+
     // 1. Total Projects Managed
     const totalProjects = await prisma.project.count({
         where: { tenantId, managerId: employeeId }
@@ -165,7 +183,7 @@ export const getManagerDashboardStats = asyncHandler(async (req, res, next) => {
             tenantId,
             OR: [
                 { managerId: employeeId },
-                { employee: { projects: { some: { managerId: employeeId } } } },
+                ...(managerDepartmentId ? [{ employee: { departmentId: managerDepartmentId } }] : []),
             ],
             managerStatus: 'PENDING',
             employee: { status: { not: "TERMINATED" } }
@@ -200,7 +218,7 @@ export const getManagerDashboardStats = asyncHandler(async (req, res, next) => {
             tenantId,
             OR: [
                 { managerId: employeeId },
-                { employee: { projects: { some: { managerId: employeeId } } } },
+                ...(managerDepartmentId ? [{ employee: { departmentId: managerDepartmentId } }] : []),
             ],
             employee: { status: { not: "TERMINATED" } }
         },
@@ -251,6 +269,8 @@ export const getManagerLeaves = asyncHandler(async (req, res, next) => {
         return res.status(400).json({ message: "tenantId and employeeId are required" });
     }
 
+    const managerDepartmentId = await getManagerDepartmentId(tenantId, employeeId);
+
     const leaves = await prisma.leave.findMany({
         where: {
             tenantId,
@@ -295,7 +315,7 @@ export const updateManagerLeaveStatus = asyncHandler(async (req, res, next) => {
             tenantId,
             OR: [
                 { managerId: employeeId },
-                { employee: { projects: { some: { managerId: employeeId } } } },
+                ...(managerDepartmentId ? [{ employee: { departmentId: managerDepartmentId } }] : []),
             ],
         }
     });
@@ -394,27 +414,33 @@ export const getProjectMembers = asyncHandler(async (req, res, next) => {
 
     const project = await prisma.project.findFirst({
         where: { id: projectId, tenantId, managerId: employeeId },
-        select: {
-            id: true,
-            name: true,
-            members: {
-                select: {
-                    id: true,
-                    firstName: true,
-                    lastName: true,
-                    email: true,
-                    role: true,
-                    profilePic: true
-                }
-            }
-        }
+        select: { id: true, name: true },
     });
 
     if (!project) {
         return res.status(403).json({ message: "Project not found or unauthorized" });
     }
 
-    res.status(200).json({ success: true, members: project.members, projectName: project.name });
+    const managerDepartmentId = await getManagerDepartmentId(tenantId, employeeId);
+    const members = await prisma.employee.findMany({
+        where: {
+            tenantId,
+            role: "EMPLOYEE",
+            status: "ACTIVE",
+            ...(managerDepartmentId ? { departmentId: managerDepartmentId } : {}),
+        },
+        select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+            profilePic: true,
+        },
+        orderBy: { firstName: "asc" },
+    });
+
+    res.status(200).json({ success: true, members, projectName: project.name });
 });
 
 //-----------------------------------------------------Create Task-----------------------------------------------------//
@@ -427,19 +453,37 @@ export const createTask = asyncHandler(async (req, res, next) => {
         return res.status(400).json({ message: "Title and Assignee are required" });
     }
 
-    // If projectId provided, verify the assignee is a member of that project
+    const managerDepartmentId = await getManagerDepartmentId(tenantId, employeeId);
+    const assignee = await prisma.employee.findFirst({
+        where: {
+            id: assigneeId,
+            tenantId,
+            role: "EMPLOYEE",
+            status: "ACTIVE",
+            ...(managerDepartmentId ? { departmentId: managerDepartmentId } : {}),
+        },
+        select: { id: true },
+    });
+    if (!assignee) {
+        return res.status(403).json({ message: "Employee must be active and in your department" });
+    }
+
     if (projectId) {
         const project = await prisma.project.findFirst({
             where: {
                 id: projectId,
                 tenantId,
                 managerId: employeeId,
-                members: { some: { id: assigneeId } }
             }
         });
         if (!project) {
-            return res.status(403).json({ message: "Assignee is not a member of the selected project" });
+            return res.status(403).json({ message: "Project not found or unauthorized" });
         }
+
+        await prisma.project.update({
+            where: { id: projectId },
+            data: { members: { connect: { id: assigneeId } } },
+        });
     }
 
     const task = await (prisma as any).task.create({
