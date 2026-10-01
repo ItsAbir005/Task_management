@@ -21,7 +21,7 @@ export const getManagerProjects = asyncHandler(async (req, res, next) => {
     const projects = await prisma.project.findMany({
         where: {
             tenantId,
-            managerId: employeeId
+            managerId: employeeId,
         },
         include: {
             members: {
@@ -274,7 +274,10 @@ export const getManagerLeaves = asyncHandler(async (req, res, next) => {
     const leaves = await prisma.leave.findMany({
         where: {
             tenantId,
-            managerId: employeeId
+            OR: [
+                { managerId: employeeId },
+                ...(managerDepartmentId ? [{ employee: { departmentId: managerDepartmentId } }] : []),
+            ],
         },
         orderBy: { appliedAt: 'desc' },
         include: {
@@ -307,6 +310,8 @@ export const updateManagerLeaveStatus = asyncHandler(async (req, res, next) => {
     if (!validStatuses.includes(managerStatus)) {
         return res.status(400).json({ message: "managerStatus must be APPROVED or REJECTED" });
     }
+
+    const managerDepartmentId = await getManagerDepartmentId(tenantId, employeeId);
 
     // Verify this leave belongs to this manager
     const existingLeave = await prisma.leave.findFirst({
