@@ -34,6 +34,42 @@ export const getManagerProjects = asyncHandler(async (req, res, next) => {
     res.status(200).json({ success: true, projects });
 });
 
+export const addProjectMember = asyncHandler(async (req, res) => {
+    const { tenantId, employeeId: managerId } = req;
+    const projectId = req.params.projectId as string;
+    const { employeeId } = req.body;
+
+    if (!tenantId || !managerId || !projectId || !employeeId) {
+        return res.status(400).json({ message: "Project and employee are required" });
+    }
+
+    const project = await prisma.project.findFirst({
+        where: { id: projectId, tenantId, managerId },
+    });
+    if (!project) {
+        return res.status(403).json({ message: "Project not found or unauthorized" });
+    }
+
+    const employee = await prisma.employee.findFirst({
+        where: { id: employeeId, tenantId, role: "EMPLOYEE", status: "ACTIVE" },
+    });
+    if (!employee) {
+        return res.status(404).json({ message: "Active employee not found" });
+    }
+
+    const updatedProject = await prisma.project.update({
+        where: { id: projectId },
+        data: { members: { connect: { id: employeeId } } },
+        include: {
+            members: {
+                select: { id: true, firstName: true, lastName: true, email: true, role: true },
+            },
+        },
+    });
+
+    res.status(200).json({ success: true, project: updatedProject });
+});
+
 //-----------------------------------------------------Update Project Status-----------------------------------------------------//
 
 export const updateProjectStatus = asyncHandler(async (req, res, next) => {

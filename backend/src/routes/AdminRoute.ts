@@ -3,7 +3,7 @@ import { AuthenticateMiddleware, authorize } from '../middlewares/AuthMiddleware
 import { addDepartment, addProject, deleteProject, getDashboardStats, getDepartment, getEmployee, getProject, updateEmployee } from '../Controllers/AdminComtroller.js';
 import { applyLeave, getEmpProjects, getLeaves, getEmpTasks, updateEmpTaskStatus, getEmpDashboardStats } from '../Controllers/EmpController.js';
 import { getHRLeaves, updateLeaveStatus, getHrDashboardStats } from '../Controllers/HRControllers.js';
-import { getManagerProjects, updateProjectStatus, getManagerDashboardStats, getManagerLeaves, updateManagerLeaveStatus, getManagerTasks, createTask, updateTaskStatus, deleteTask, getProjectMembers } from '../Controllers/ManagerController.js';
+import { getManagerProjects, addProjectMember, updateProjectStatus, getManagerDashboardStats, getManagerLeaves, updateManagerLeaveStatus, getManagerTasks, createTask, updateTaskStatus, deleteTask, getProjectMembers } from '../Controllers/ManagerController.js';
 import { getTaskComments, addComment, deleteComment } from '../Controllers/CommentController.js';
 
 
@@ -29,6 +29,7 @@ router.get('/hr-dashboard-stats', AuthenticateMiddleware, authorize('ADMIN', 'HR
 //====================== MANAGER ======================//
 router.get('/manager-dashboard-stats', AuthenticateMiddleware, authorize('MANAGER', 'ADMIN'), getManagerDashboardStats);
 router.get('/manager-projects', AuthenticateMiddleware, authorize('MANAGER', 'ADMIN'), getManagerProjects);
+router.post('/manager-project/:projectId/members', AuthenticateMiddleware, authorize('MANAGER', 'ADMIN'), addProjectMember);
 router.put('/manager-project/:projectId/status', AuthenticateMiddleware, authorize('MANAGER', 'ADMIN'), updateProjectStatus);
 router.get('/manager-leaves', AuthenticateMiddleware, authorize('MANAGER', 'ADMIN'), getManagerLeaves);
 router.put('/manager-leave-status', AuthenticateMiddleware, authorize('MANAGER', 'ADMIN'), updateManagerLeaveStatus);

@@ -4,22 +4,25 @@ import { GlobleContext } from "../../context/GlobleContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Loader2, Calendar, LayoutGrid, Users, CheckCircle, Clock } from "lucide-react";
 import StatusBadge from "../../components/common/StatusBadge";
+import { API_URL } from "../../config/api";
 
 const MangProManagement = () => {
   const { managerProjects, setManagerProjects } = useContext(GlobleContext) as any;
   const [loading, setLoading] = useState(managerProjects.length === 0);
   const [searchQuery, setSearchQuery] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [memberToAdd, setMemberToAdd] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/admin/manager-projects", {
-          withCredentials: true,
-        });
-        if (res.data.success) {
-          setManagerProjects(res.data.projects);
-        }
+        const [projectsRes, employeesRes] = await Promise.all([
+          axios.get(`${API_URL}/api/admin/manager-projects`, { withCredentials: true }),
+          axios.get(`${API_URL}/api/admin/getEmployee`, { withCredentials: true }),
+        ]);
+        if (projectsRes.data.success) setManagerProjects(projectsRes.data.projects);
+        setEmployees((employeesRes.data.employees || []).filter((employee: any) => employee.role === "EMPLOYEE"));
       } catch (error) {
         console.error("Failed to fetch manager projects:", error);
       } finally {
@@ -28,6 +31,25 @@ const MangProManagement = () => {
     };
     fetchProjects();
   }, [setManagerProjects]);
+
+  const handleAddMember = async (projectId: string) => {
+    const employeeId = memberToAdd[projectId];
+    if (!employeeId) return;
+
+    try {
+      const res = await axios.post(
+        `${API_URL}/api/admin/manager-project/${projectId}/members`,
+        { employeeId },
+        { withCredentials: true }
+      );
+      setManagerProjects((prev: any[]) => prev.map((project: any) =>
+        project.id === projectId ? { ...project, members: res.data.project.members } : project
+      ));
+      setMemberToAdd((prev) => ({ ...prev, [projectId]: "" }));
+    } catch (error) {
+      console.error("Failed to add project member:", error);
+    }
+  };
 
   const handleStatusUpdate = async (projectId: string, newStatus: string) => {
     setUpdatingId(projectId);
@@ -181,6 +203,31 @@ const MangProManagement = () => {
                         <span className="text-xs text-slate-400 font-medium bg-slate-50 px-2 py-1 rounded-md">Unassigned</span>
                       )}
                     </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={memberToAdd[project.id] || ""}
+                      onChange={(e) => setMemberToAdd((prev) => ({ ...prev, [project.id]: e.target.value }))}
+                      className="min-w-0 flex-1 bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                      <option value="">Add employee to project</option>
+                      {employees
+                        .filter((employee) => !(project.members || []).some((member: any) => member.id === employee.id))
+                        .map((employee) => (
+                          <option key={employee.id} value={employee.id}>
+                            {employee.firstName} {employee.lastName || ""} ({employee.email})
+                          </option>
+                        ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => handleAddMember(project.id)}
+                      disabled={!memberToAdd[project.id]}
+                      className="shrink-0 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Add
+                    </button>
                   </div>
 
                   {/* Action Row */}
