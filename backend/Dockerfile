@@ -19,6 +19,7 @@ RUN npx prisma generate
 
 # Copy the rest of the application code
 COPY . .
+RUN npm run build
 
 # Stage 2: Production
 FROM node:20-slim
@@ -32,8 +33,7 @@ WORKDIR /app
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/generated ./generated
-COPY --from=builder /app ./
+COPY --from=builder /app/dist ./dist
 
 # Expose the port the app runs on
 EXPOSE 3000

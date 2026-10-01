@@ -42,7 +42,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
   res.cookie('token', token, {
     httpOnly: true,
     secure: config.env === 'production',
-    sameSite: 'strict',
+    sameSite: config.env === 'production' ? 'none' : 'strict',
     maxAge: 2 * 60 * 60 * 1000,
   });
 
@@ -80,7 +80,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     res.cookie('token', tempToken, {
       httpOnly: true,
       secure: config.env === 'production',
-      sameSite: 'strict',
+      sameSite: config.env === 'production' ? 'none' : 'strict',
       maxAge: 2 * 60 * 60 * 1000,
     });
     return res.status(402).json({
@@ -100,7 +100,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   res.cookie('token', token, {
     httpOnly: true,
     secure: config.env === 'production',
-    sameSite: 'strict',
+    sameSite: config.env === 'production' ? 'none' : 'strict',
     maxAge: 24 * 60 * 60 * 1000,
   });
 
@@ -141,7 +141,7 @@ export const employeeLogin = asyncHandler(async (req: Request, res: Response) =>
   res.cookie('token', token, {
     httpOnly: true,
     secure: config.env === 'production',
-    sameSite: 'strict',
+    sameSite: config.env === 'production' ? 'none' : 'strict',
     maxAge: 24 * 60 * 60 * 1000,
   });
 
@@ -471,7 +471,7 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
   res.clearCookie('token', {
     httpOnly: true,
     secure: config.env === 'production',
-    sameSite: 'strict',
+    sameSite: config.env === 'production' ? 'none' : 'strict',
   });
   res.json({ success: true, message: "Logged out successfully" });
 });
