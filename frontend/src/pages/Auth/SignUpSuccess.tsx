@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle, Building2, ArrowRight, Loader2, AlertTriangle } from "lucide-react";
 import axios from "axios";
+import { API_URL } from "../../config/api";
 
 const SignUpSuccess = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const SignUpSuccess = () => {
 
       try {
         await axios.post(
-          "http://localhost:3000/api/stripe/verify-session",
+          `${API_URL}/api/stripe/verify-session`,
           { sessionId },
           { withCredentials: true }
         );
