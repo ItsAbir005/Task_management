@@ -127,7 +127,10 @@ export const getManagerDashboardStats = asyncHandler(async (req, res, next) => {
     const pendingLeaves = await prisma.leave.count({
         where: {
             tenantId,
-            managerId: employeeId,
+            OR: [
+                { managerId: employeeId },
+                { employee: { projects: { some: { managerId: employeeId } } } },
+            ],
             managerStatus: 'PENDING',
             employee: { status: { not: "TERMINATED" } }
         }
@@ -159,7 +162,10 @@ export const getManagerDashboardStats = asyncHandler(async (req, res, next) => {
     const recentLeaves = await prisma.leave.findMany({
         where: {
             tenantId,
-            managerId: employeeId,
+            OR: [
+                { managerId: employeeId },
+                { employee: { projects: { some: { managerId: employeeId } } } },
+            ],
             employee: { status: { not: "TERMINATED" } }
         },
         take: 5,
@@ -248,7 +254,14 @@ export const updateManagerLeaveStatus = asyncHandler(async (req, res, next) => {
 
     // Verify this leave belongs to this manager
     const existingLeave = await prisma.leave.findFirst({
-        where: { id: leaveId, tenantId, managerId: employeeId }
+        where: {
+            id: leaveId,
+            tenantId,
+            OR: [
+                { managerId: employeeId },
+                { employee: { projects: { some: { managerId: employeeId } } } },
+            ],
+        }
     });
 
     if (!existingLeave) {
@@ -262,6 +275,7 @@ export const updateManagerLeaveStatus = asyncHandler(async (req, res, next) => {
     const updatedLeave = await prisma.leave.update({
         where: { id: leaveId },
         data: {
+            managerId: employeeId,
             managerStatus,
             status: globalStatus
         },
