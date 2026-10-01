@@ -1,5 +1,6 @@
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import prisma from "../utils/client.js";
+import ApiError from "../utils/ApiError.js";
 
 
 //-------------------------------------Add Department-----------------------------------//
@@ -87,7 +88,7 @@ export const getEmployee = asyncHandler(async (req, res, next) => {
 
 export const updateEmployee = asyncHandler(async (req, res, next) => {
     const tenantId = req.tenantId;
-    const { employeeId } = req.params;
+    const employeeId = req.params.employeeId as string;
     const { salary, status } = req.body;
 
     const dataToUpdate: any = {};
@@ -113,7 +114,7 @@ export const addProject = asyncHandler(async (req, res, next) => {
 
   const tenantId = req.tenantId;
   if (!tenantId) {
-    return next(new Error("Tenant ID missing in request", 400));
+    return next(new ApiError(400, "Tenant ID missing in request"));
   }
 
  const project = await prisma.project.create({
@@ -125,7 +126,7 @@ export const addProject = asyncHandler(async (req, res, next) => {
     tenant: { connect: { id: tenantId } },
     manager: { connect: { id: managerId } },
     members: {
-      connect: memberIds?.map((id) => ({ id })) || [],
+      connect: (memberIds as string[] | undefined)?.map((id: string) => ({ id })) || [],
     },
   },
   include: {
@@ -169,7 +170,7 @@ export const getProject = asyncHandler(async (req, res, next) => {
 //-------------------------------------Delete Projects-----------------------------------//
 
 export const deleteProject = asyncHandler(async (req, res, next) => {
-  const { projectId } = req.params;
+  const projectId = req.params.projectId as string;
   await prisma.project.delete({
     where: { id: projectId }
   })

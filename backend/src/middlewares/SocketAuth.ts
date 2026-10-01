@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken';
+import type { Socket } from 'socket.io';
 import config from '../config/config.js';
 
 // Rewriting content to self-contained parsing
-export const SocketAuth = (socket, next) => {
+export const SocketAuth = (socket: Socket, next: (error?: Error) => void) => {
     const cookieString = socket.request.headers.cookie;
 
     if (!cookieString) {

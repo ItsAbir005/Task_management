@@ -1,7 +1,8 @@
 import ApiError from '../utils/ApiError.js';
 import config from '../config/config.js';
+import type { NextFunction, Request, Response } from 'express';
 
-const errorMiddleware = (err, req, res, next) => {
+const errorMiddleware = (err: any, req: Request, res: Response, next: NextFunction) => {
     let { statusCode, message } = err;
 
     // If error is not an instance of ApiError, it's likely a generic Error or Prisma Error
