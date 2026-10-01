@@ -18,6 +18,8 @@ const config = {
     email: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD?.replace(/\s/g, ''),
+        resendApiKey: process.env.RESEND_API_KEY,
+        from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
     },
     frontendUrl,
     stripe: {
