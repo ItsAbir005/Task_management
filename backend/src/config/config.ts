@@ -4,6 +4,12 @@ import path from 'path';
 dotenv.config();
 
 const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+const frontendUrls = [...new Set([
+    frontendUrl,
+    ...(process.env.FRONTEND_URLS || '').split(',')
+        .map((url) => url.trim().replace(/\/+$/, ''))
+        .filter(Boolean),
+])];
 
 const config = {
     env: process.env.NODE_ENV || 'development',
@@ -22,6 +28,7 @@ const config = {
         from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
     },
     frontendUrl,
+    frontendUrls,
     stripe: {
         secretKey: process.env.STRIPE_SECRET_KEY || process.env.STRIPES_SECRET_KEY || '',
         publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || process.env.STRIPES_PUBLISHABLE_KEY || '',
